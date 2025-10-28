@@ -20,7 +20,7 @@ def get_bot_token():
 
 def load_dataset():
     try:
-        ds = pd.read_excel()
+        ds = pd.read_excel('dataset.xlsx')
         return ds
     except Exception as e:
         print(f"Ошибка загрузки датасета - {e}")
