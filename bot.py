@@ -65,7 +65,7 @@ def ai_run(user_request, hours, minutes, start_point):
             'title': place.get('title'),
             'address': place.get('address'),
             'description': place.get('description'),
-            'coordinates': {'x': x, 'y': y},
+            'coordinates': {'lat': y, 'lon': x},
             'url': place.get('url', ''),
             'reason': "Это место подходит под ваш запрос"
         })
