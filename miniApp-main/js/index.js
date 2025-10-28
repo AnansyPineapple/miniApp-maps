@@ -39,4 +39,18 @@ for(let i = 1; i <= 5; i++){
 });
 
 
+document.querySelector('mainForm').addEventListener('submit', function(e) {
+    e.preventDefault();
 
+    const formData = {
+        user_request: document.getElementById('firstQuestion').value(),
+        hours: document.getElementById('hoursChoice').value,
+        minutes: document.getElementById('minutesChoice').value,
+        start_point: document.getElementById('thirdQuestion').value
+    };
+
+    if (window.Telegram && window.Telegram.WebApp) {
+        Telegram.WebApp.sendData(JSON.stringify(formData));
+        Telegram.WebApp.close();
+    }
+})

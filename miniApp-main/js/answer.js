@@ -119,3 +119,69 @@ document.querySelector('.buttonsCont button:last-child').addEventListener('click
 document.querySelector('.buttonsCont button:first-child').addEventListener('click', () => {
     window.location.href = 'index.html';
 });
+
+function loadPlacesData() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const dataParam = urlParams.get('data');
+    
+    if (dataParam) {
+        const decodedData = decodeURIComponent(dataParam);
+        return JSON.parse(decodedData);
+    }
+    return [];
+}
+
+function createHtml(place, index) {
+    return `
+        <div class="aboutObject">
+            <div class="aboutObjHead">
+                <div class="objTitle">
+                    ${index + 1}. ${place.title}
+                </div>
+                <div class="coordinates">
+                    <div class="street">
+                        <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="5" cy="5" r="5" fill="#FF7B00"/>
+                            <path d="M5.00016 16L0.66683 7.33333L9.3335 7.33333L5.00016 16Z" fill="#FF7B00"/>
+                            <circle cx="5" cy="5.5" r="2.5" fill="white"/>
+                        </svg>
+                        <span>${place.address}</span>
+                    </div>
+                    <div class="path">
+                        <svg width="12" height="12" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        </svg>
+                        <a href="https://yandex.ru/maps/?pt=${place.coordinates.lon},${place.coordinates.lat}&z=16&l=map" target="_blank">
+                            ${place.coordinates.lat}, ${place.coordinates.lon}
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="objDescriptionWrapper">
+                <div class="objDescription truncatedText">
+                    ${place.description.substring(0, 150)}...
+                </div>
+            </div>
+            <div class="ObjFooter" data-text="${place.reason}">
+                Почему мне предложили этот объект?
+            </div>
+        </div>
+    `;
+}
+
+function renderPlaces() {
+    const places = loadPlacesData();
+    const container = document.getElementById('placesContainer');
+    
+    if (places.length === 0) {
+        container.innerHTML = '<div class="error">Нет данных о местах</div>';
+        return;
+    }
+    
+    container.innerHTML = places.map((place, index) => 
+        createHtml(place, index)
+    ).join('');
+
+    initMap(places);
+}
+
+document.addEventListener('DOMContentLoaded', renderPlaces);
