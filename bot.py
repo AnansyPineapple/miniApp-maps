@@ -1,5 +1,8 @@
 import os
 import logging
+import pandas as pd
+import json
+from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 
@@ -9,12 +12,19 @@ logger = logging.getLogger(__name__)
 def get_bot_token():
     token = os.getenv('TELEGRAM_BOT_TOKEN')
     if not token:
-        from dotenv import load_dotenv
         load_dotenv()
         token = os.getenv('TELEGRAM_BOT_TOKEN')
     if not token:
         raise ValueError("TELEGRAM_BOT_TOKEN was not found!")
     return token
+
+def load_dataset():
+    try:
+        ds = pd.read_excel()
+        return ds
+    except Exception as e:
+        print(f"Ошибка загрузки датасета - {e}")
+        return None
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
