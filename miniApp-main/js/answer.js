@@ -171,6 +171,7 @@ function createHtml(place, index) {
 function renderPlaces() {
     const places = loadPlacesData();
     const container = document.getElementById('placesContainer');
+    console.log('Loaded places:', places);
     
     if (places.length === 0) {
         container.innerHTML = '<div class="error">Нет данных о местах</div>';
