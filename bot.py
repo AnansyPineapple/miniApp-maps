@@ -5,9 +5,11 @@ import json
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
+from flask import Flask, request, jsonify
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+app = Flask(__name__)
 
 def get_bot_token():
     token = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -39,6 +41,31 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Чтобы начать работу необходимо запустить приложение!", reply_markup = reply_markup)
+
+@app.route('/generate_route', methods=['POST'])
+def generate_route():
+    data = request.json
+    print("Получен запрос:", data)
+
+    result = {
+        "places": [
+            {
+                "title": "Памятник Почтальону",
+                "address": "ул. Большая Покровская",
+                "coord": [56.331576, 44.003277],
+                "description": "Бронзовый памятник почтальону в центре города.",
+                "reason": "Популярное место для прогулок и фотографий."
+            },
+            {
+                "title": "Нижегородский Кремль",
+                "address": "Кремль",
+                "coord": [56.3287, 44.0021],
+                "description": "Историческая крепость, сердце города.",
+                "reason": "Вы интересовались историческими достопримечательностями."
+            }
+        ]
+    }
+    return jsonify(result)
 
 def main():
     token = get_bot_token()

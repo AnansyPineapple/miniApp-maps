@@ -38,5 +38,24 @@ for(let i = 1; i <= 5; i++){
     minutesSelect.appendChild(opt);
 });
 
+document.getElementById('routeForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
 
+  const data = {
+    query: document.getElementById('firstQuestion').value,
+    hours: document.getElementById('hoursChoice').value,
+    minutes: document.getElementById('minutesChoice').value,
+    startPoint: document.getElementById('thirdQuestion').value
+  };
 
+  const response = await fetch('https://map-bot-3rhu.onrender.com/generate_route', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify(data)
+  });
+
+  const result = await response.json();
+  localStorage.setItem('routeData', JSON.stringify(result));
+
+  window.location.href = 'answer.html';
+});

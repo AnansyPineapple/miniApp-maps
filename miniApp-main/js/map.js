@@ -1,21 +1,26 @@
 ymaps.ready(init);
 
 function init() {
-    // Создаём карту
-    const map = new ymaps.Map("map", {
-        center: [56.326797, 44.006516], // Нижний Новгород
-        zoom: 12,
-        controls:[]
-    });
-    map.behaviors.disable(['scrollZoom', 'drag', 'dblClickZoom']);
-    // Пример: добавление одной метки (можно заменить данными с бэкенда)
-    const placemark = new ymaps.Placemark([56.326797, 44.006516], {
-        balloonContent: "Центр Нижнего Новгорода"
-    }, {
-        preset: "islands#orangeDotIcon"
-    });
+  const map = new ymaps.Map("map", {
+    center: [56.326797, 44.006516],
+    zoom: 12,
+    controls: []
+  });
 
-    map.geoObjects.add(placemark);
+  const routeData = JSON.parse(localStorage.getItem('routeData'));
+  if (!routeData || !routeData.places) return;
+
+  const coords = routeData.places.map(p => p.coord);
+
+  coords.forEach(c => {
+    map.geoObjects.add(new ymaps.Placemark(c, {}, {preset: "islands#orangeDotIcon"}));
+  });
+
+  if (coords.length > 1) {
+    const route = new ymaps.Polyline(coords, {}, {strokeColor: "#FF7B00", strokeWidth: 3});
+    map.geoObjects.add(route);
+    map.setBounds(route.geometry.getBounds());
+  }
 }
 
 

@@ -1,3 +1,35 @@
+const routeData = JSON.parse(localStorage.getItem('routeData'));
+
+if (routeData && routeData.places) {
+  const container = document.querySelector('.ansContainer');
+  container.innerHTML = '';
+
+  routeData.places.forEach((place, index) => {
+    const html = `
+      <div class="aboutObject">
+        <div class="aboutObjHead">
+          <div class="objTitle">${index + 1}. ${place.title}</div>
+          <div class="coordinates">
+            <div class="street"><span>${place.address}</span></div>
+            <div class="path">
+              <a href="https://yandex.ru/maps/?pt=${place.coord[1]},${place.coord[0]}&z=16&l=map" target="_blank">
+                ${place.coord[1]}, ${place.coord[0]}
+              </a>
+            </div>
+          </div>
+        </div>
+        <div class="objDescriptionWrapper">
+          <div class="objDescription">${place.description}</div>
+        </div>
+        <div class="ObjFooter" data-text="${place.reason}">
+          Почему мне предложили этот объект?
+        </div>
+      </div>
+    `;
+    container.insertAdjacentHTML('beforeend', html);
+  });
+}
+
 const modalOverlay = document.getElementById('modalOverlay');
 const modalText = document.querySelector('.modalText');
 const modalCloseBtn = document.getElementById('modalCloseBtn');
