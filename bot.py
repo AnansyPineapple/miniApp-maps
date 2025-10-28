@@ -42,7 +42,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Чтобы начать работу необходимо запустить приложение!", reply_markup = reply_markup)
 
-async def ai_run(user_request, hours, minutes, start_point):
+def ai_run(user_request, hours, minutes, start_point):
     dataset = load_dataset()
     
     #Пока что берем рандомное кол-во мест от 3 до 5, и берем это число случайных мест
@@ -55,7 +55,7 @@ async def ai_run(user_request, hours, minutes, start_point):
 
         point = str(place.get('coordinate', 'POINT (0 0)'))
         if 'POINT' in point:
-            coords = place.replace('POINT (', '').replace(')', '')
+            coords = point.replace('POINT (', '').replace(')', '')
             x, y = map(float, coords.split())
         else:
             x, y = 44.006516, 56.326797
@@ -70,11 +70,11 @@ async def ai_run(user_request, hours, minutes, start_point):
             'reason': "Это место подходит под ваш запрос"
         })
 
-        return result
+    return result
     
-async def handle_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
-    web_data = update.message.web_data
-    data_json = web_data.data
+async def handle_web_app_data(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    web_app_data = update.message.web_app_data
+    data_json = web_app_data.data
 
     data = json.loads(data_json)
 
@@ -103,7 +103,7 @@ def main():
 
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    app.add_handler(MessageHandler(filters.StatusUpdate.DATA, handle_data))
+    app.add_handler(MessageHandler(filters.StatusUpdate.WEB_APP_DATA, handle_web_app_data))
 
     if os.getenv('RENDER'):
         port = int(os.environ.get('PORT', 10000))
