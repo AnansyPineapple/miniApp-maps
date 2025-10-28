@@ -42,10 +42,10 @@ document.getElementById('routeForm').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const data = {
-    query: document.getElementById('firstQuestion').value,
-    hours: document.getElementById('hoursChoice').value,
-    minutes: document.getElementById('minutesChoice').value,
-    startPoint: document.getElementById('thirdQuestion').value
+    query: firstTextarea.value,
+    hours: hoursSelect.value,
+    minutes: minutesSelect.value,
+    startPoint: thirdTextarea.value
   };
 
   const response = await fetch('https://map-bot-3rhu.onrender.com/generate_route', {
