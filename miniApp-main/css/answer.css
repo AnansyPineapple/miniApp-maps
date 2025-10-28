@@ -1,0 +1,294 @@
+@font-face {
+    font-family: "ST-Nizhegorodsky";
+    src: url(/css/ST-Nizhegorodsky/ST-Nizhegorodsky.ttf);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Caveat", cursive;
+}
+
+body, html {
+    overflow-x: hidden;
+    background-color: #FFD6B2;
+}
+
+body {
+    height: 100%;
+    
+}
+
+
+
+.answerSection {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+
+}
+
+.mainBlockContainer {
+    position: relative;
+    display: flex;
+    flex-direction: column; 
+    border: 1.5px solid #FFA812;
+    border-radius: 10px;
+    background-color: #fff;
+    width: 100%;
+    max-width: 340px;
+    height: 600px;
+}
+
+.mainTitle {
+    font-family: 'ST-Nizhegorodsky';
+    font-size: 19px;
+    font-weight: 400;
+    color: #FF7B00;
+    text-align: center;
+    padding: 23.65px 0 19px;
+    flex-shrink: 0; 
+}
+
+.lineBetweenTitleAndMain {
+    display: block;
+    width: 100%;
+    height: 1.5px;
+    background-color: #FFA410;
+    flex-shrink: 0;
+}
+
+.ansContainer {
+    flex: 1; 
+    overflow-y: auto; 
+    margin: 0 29px;
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+}
+
+.ansContainer::-webkit-scrollbar {
+    display: none; 
+}
+
+.mainMap {
+    width: 100%;
+    height: 300px;
+    border: 1px solid #FFA812;
+    border-radius: 5px;
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+.aboutObject {
+    width: 100%;
+    border: 1px solid #FFA812;
+    border-radius: 5px;
+    margin-bottom: 10px;
+}
+
+.aboutObjHead {
+    padding: 16px 0 10px 10px;
+
+}
+
+.objTitle {
+    font-size: 18px;
+}
+
+.coordinates {
+    margin-top: 10px;
+    font-size: 12px;
+    display: flex;
+    flex-direction: row;
+}
+
+.street {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+    margin-right: 15px;
+}
+
+.path {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 5px;
+}
+
+.path a {
+    color:#FF7B00;
+    text-decoration: underline;
+}
+
+.objDescriptionWrapper {
+    overflow: hidden;
+    position: relative;
+    border-top: 1px dashed #FF7B00;
+    border-bottom: 1px dashed #FF7B00;
+    background-color: #FFE9D5;
+    padding: 6px 5px;
+}
+
+.objDescription {
+    width: 100%;
+    font-size: 12px;
+    color: #FF7B00;
+    padding: 0 6px;
+    text-decoration: underline;
+}
+
+.truncatedText {
+    display: -webkit-box;
+    -webkit-line-clamp: 3; 
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+
+.ObjFooter {
+    font-size: 12px;
+    color: #FF7B00;
+    text-decoration: underline;
+    text-align: center;
+    margin: 9px 0;
+}
+
+
+
+.buttonsCont {
+    position: relative; 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 17px 0;
+    border-top: 1px solid #FF7E01;
+    box-shadow: 0 -4px 10px -4px rgba(0, 0, 0, 0.25);
+    border-radius: 0 0 10px 10px;
+    background-color: #fff;
+    flex-shrink: 0; 
+}
+
+.buttonsCont button {
+    background-color: #FF7B00;
+    color: #fff;
+    font-size: 18px;
+    font-weight: 100;
+    width: 145px;
+    height: 33px;
+    border: none;
+    border-radius: 8px;
+}
+
+.buttonsCont button:first-child {
+    margin-right: 9px;
+}
+
+
+
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    backdrop-filter: blur(5px);
+    background-color: rgba(255, 255, 255, 0.1); 
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.modalOverlay.active {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modalWindow {
+    background: #fff;
+    border: 1px solid #FFA812;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 340px;
+    height: 500px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    display: flex;
+    flex-direction: column;
+    transform: translateY(-50px);
+    opacity: 0;
+    transition: all 0.3s ease;
+}
+
+.modalOverlay.active .modalWindow {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.modalHeader {
+    font-family: 'ST-Nizhegorodsky';
+    font-size: 20px;
+    font-weight: 400;
+    color: #FF7B00;
+    text-align: center;
+    padding: 23.65px 0 19px;
+    flex-shrink: 0; 
+    border-bottom: 1px solid #FFA812;
+    
+}
+
+.modalCont {
+    display: flex;
+    flex-direction: column;
+    flex: 1; 
+    overflow: hidden; 
+    
+}
+
+.modalCont::-webkit-scrollbar {
+    display: none; 
+}
+
+
+.modalText {
+    flex: 1;
+    overflow-y: auto;
+    font-size: 18px;
+    color: #FF7B00;
+    text-align: center;
+    max-height: 400px;
+    padding: 28px 18px 0 18px;
+    scrollbar-width: none; 
+    -ms-overflow-style: none;
+
+}
+
+.modalBtnCont {
+    flex-shrink: 0;
+    display: flex;
+    justify-content: center;
+    padding: 17px 0;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.25);
+}
+
+.modalCloseBtn {
+    background-color: #FF7B00;
+    color: #fff;
+    font-size: 18px;
+    border: none;
+    border-radius: 7px;
+    font-size: 16px;
+    cursor: pointer;
+    width: 145px;
+    height: 33px;
+}
+
+
