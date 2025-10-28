@@ -41,6 +41,9 @@ function loadPlacesData() {
     const urlParams = new URLSearchParams(window.location.search);
     const dataParam = urlParams.get('data');
     
+    console.log('URL params:', window.location.search);
+    console.log('Data param:', dataParam);
+
     if (dataParam) {
         try {
             const decodedData = decodeURIComponent(dataParam);
@@ -50,5 +53,11 @@ function loadPlacesData() {
             return [];
         }
     }
+
+    const storedData = localStorage.getItem('formData');
+    if (storedData) {
+        console.log('Using stored data:', storedData);
+    }
+    
     return [];
 }
