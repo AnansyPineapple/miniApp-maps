@@ -30,14 +30,14 @@ def load_dataset():
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [InlineKeyboardButton("Открыть приложение", web_app = {"url" : "https://abchihba0.github.io/miniApp/"})]
+        [InlineKeyboardButton("Открыть приложение", web_app = {"url" : "https://anansypineapple.github.io/miniApp-maps/"})]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Привет, друг! Нажми кнопку ниже чтобы запустить приложение!", reply_markup = reply_markup)
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [InlineKeyboardButton("Открыть приложение", web_app = {"url" : "https://abchihba0.github.io/miniApp/"})]
+        [InlineKeyboardButton("Открыть приложение", web_app = {"url" : "https://anansypineapple.github.io/miniApp-maps/"})]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Чтобы начать работу необходимо запустить приложение!", reply_markup = reply_markup)
