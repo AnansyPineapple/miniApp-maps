@@ -104,7 +104,7 @@ def generate_route():
         selected_places = pd.concat([selected_places, additional_places])
 
     result = []
-    for place in selected_places.to_dict():
+    for _, place in selected_places.iterrows():
         coords = place['coordinate'].replace("POINT (", "").replace(")", "").split()
         result.append({
             "title": place['title'],
