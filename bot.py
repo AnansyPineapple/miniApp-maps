@@ -50,9 +50,6 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 def generate_route():
     if request.method == 'OPTIONS':
         response = jsonify({'status': 'ok'})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type')
         return response
     
     data = request.json
@@ -76,9 +73,7 @@ def generate_route():
             }
         ]
     }
-    response = jsonify(result)
-    CORS(response)
-    return response
+    return jsonify(result)
 
 def main():
     token = get_bot_token()
@@ -97,7 +92,7 @@ def main():
 
     logger.info("Bot is running from Render.com")
 
-    Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port)).start()
+    Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port, debug=False)).start()
 
         #app.run_webhook(
         #    listen="0.0.0.0", 
@@ -111,6 +106,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
