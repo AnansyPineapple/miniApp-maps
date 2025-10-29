@@ -46,12 +46,8 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Чтобы начать работу необходимо запустить приложение!", reply_markup = reply_markup)
 
-@flask_app.route('/generate_route', methods=['POST' , 'OPTIONS'])
+@flask_app.route('/generate_route', methods=['POST'])
 def generate_route():
-    if request.method == 'OPTIONS':
-        response = jsonify({'status': 'ok'})
-        return response
-    
     data = request.json
     print("Получен запрос:", data)
 
@@ -73,6 +69,7 @@ def generate_route():
             }
         ]
     }
+    result.headers.add('Access-Control-Allow-Origin', '*')
     return jsonify(result)
 
 def main():
@@ -106,6 +103,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
