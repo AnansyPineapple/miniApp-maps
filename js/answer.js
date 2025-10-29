@@ -33,8 +33,8 @@ if (routeData && routeData.places) {
                     <line x1="7.77778" y1="16" x2="7.77778" y2="13.3333" stroke="#FF7B00" stroke-width="0.444444"></line>
                     <line x1="8.22222" y1="13.3333" x2="8.22222" y2="16" stroke="#FF7B00" stroke-width="0.444444"></line>
                 </svg>    
-                <a href="https://yandex.ru/maps/?pt=${place.coord[1]},${place.coord[0]}&z=16&l=map" target="_blank">
-                    ${place.coord[1]}, ${place.coord[0]}
+                <a href="https://yandex.ru/maps/?pt=${place.coord[0]},${place.coord[1]}&z=16&l=map" target="_blank">
+                    ${place.coord[0]}, ${place.coord[1]}
               </a>
             </div>
           </div>

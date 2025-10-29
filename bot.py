@@ -8,6 +8,7 @@ from telegram.ext import Application, CommandHandler, MessageHandler, filters, C
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 from threading import Thread
+import random
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -46,29 +47,65 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Чтобы начать работу необходимо запустить приложение!", reply_markup = reply_markup)
 
+categories = {
+    1: ["памятник","скульптура","монумент","статуя"],
+    2: ["парк","сквер","зона","отдых","прогулка","гулять"],
+    3: ["макет","объект","здание"],
+    4: ["набережная","берег","река","Волга","Ока"],
+    5: ["архитектура","история","постройка"],
+    6: ["культура","досуг","тц","развлечения"],
+    7: ["музей","выставка","галерея","пространство","искусство","художник"],
+    8: ["театр","филармония"],
+    9: ["города","инфраструктура"],
+    10: ["монумент","искусство"],
+    11: ["ресторан","кафе","еда","голоден","жрать"],
+    12: ["кофе","кофейня","выпить"],
+    13: ["кондитерская","пекарня","булочки","торт","пирожные"]
+}
+
+def define_categories(text):
+    text = text.lower()
+
+    found_categories = []
+
+    for key, value in categories.items():
+        for word in value:
+            if word in text:
+                found_categories.append(key)
+                break
+    
+    return list(set(found_categories))
+
 @flask_app.route('/generate_route', methods=['POST'])
 def generate_route():
     data = request.json
-    print("Получен запрос:", data)
 
-    result = {
-        "places": [
-            {
-                "title": "Памятник Почтальону",
-                "address": "ул. Большая Покровская",
-                "coord": [56.331576, 44.003277],
-                "description": "Бронзовый памятник почтальону в центре города.",
-                "reason": "Популярное место для прогулок и фотографий."
-            },
-            {
-                "title": "Нижегородский Кремль",
-                "address": "Кремль",
-                "coord": [56.3287, 44.0021],
-                "description": "Историческая крепость, сердце города.",
-                "reason": "Вы интересовались историческими достопримечательностями."
-            }
-        ]
-    }
+    query = data.get('query')
+    hours = data.get('hours')
+    minutes = data.get('minutes')
+    startPoint = data.get('startPoint')
+
+    request_categories = define_categories(query)
+
+    ds = load_dataset()
+    list_of_places = ds[ds['category_id'].isin(request_categories)]
+
+    #Пока что логика - брать первые 3-5 мест или если их менее 3 то дополняем случайными
+    selected_places = list_of_places.head(random.randint(3,5))
+    if len(selected_places) < 3:
+        additional_places = ds.sample(3 - len(selected_places))
+        selected_places = pd.concat([selected_places, additional_places])
+
+    result = []
+    for place in selected_places.iterrows():
+        coords = place['coordinate'].replace("POINT (", "").replace(")", "").split()
+        result.append({
+            "title": place['title'],
+            "address": place['address'],
+            "coord": [coords[0], coords[1]],
+            "description": place['description'],
+            "reason": "В вашем запросе были подходящие слова!"
+        })
     result.headers.add('Access-Control-Allow-Origin', '*')
     return jsonify(result)
 
