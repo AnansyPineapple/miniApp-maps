@@ -2,7 +2,7 @@ const routeData = JSON.parse(localStorage.getItem('routeData'));
 
 if (routeData && routeData.places) {
   const container = document.querySelector('.ansContainer');
-  container.innerHTML = '';
+  container.innerHTML = '<div class="mapBlock"><div class="mainMap" id="map"></div></div>';
 
   routeData.places.forEach((place, index) => {
     const html = `
