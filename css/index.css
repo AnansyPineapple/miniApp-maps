@@ -1,4 +1,3 @@
-
 @font-face {
     font-family: "ST-Nizhegorodsky";
     src: url(ST-Nizhegorodsky/ST-Nizhegorodsky.ttf);
@@ -16,195 +15,84 @@ body, html {
     background-color: #FFD6B2;
 }
 
-body {
-    height: 100%;
-    
-}
-
-.questionsSection {
-    display: flex;
-    justify-content: center;
-    align-items: center;
+.IntroHeader {
+    width: 100%;
     height: 100vh;
-}
-
-.mainBlockContainer {
-    border: solid 1.5px #FFA812;
-    border-radius: 10px;
-    background-color: #fff;
-    
-    width: 100%;
-    max-width: 340px;
-    max-height: 500px;
-
-}
-
-.mainTitle {
-    font-family: 'ST-Nizhegorodsky';
-    font-size: 19px;
-    font-weight: 400;
-    color: #FF7B00;
-    text-align: center;
-    padding: 23.65px 0 19px;
-
-}
-
-.lineBetweenTitleAndMain {
-    display: block;
-    width: 100%;
-    height: 1.5px;
-    background-color: #FFA410;
-    
-}
-.formContainer {
-    font-size: 18px;
-    color: #000;
-    padding: 31px 35px 25px;
-
-}
-
-
-
-#firstQuestion {
-    color: #000;
-    font-family: "Roboto", sans-serif;
-    font-size: 12px;
-    border-color: #FF6F00;
-    border-radius: 7px; 
-    margin-top: 5px;
-    margin-bottom: 15px;
-    width: 100%;
-    min-height: 65px;
-    max-height: 150px;
-    outline: none;
-    resize: none;
-    padding: 7px 8px; 
-    overflow: hidden;
-    
-}
-
-#firstQuestion::placeholder {
-    font-family: "Caveat", cursive;
-    color: #FFCCA5;
-}
-
-
-.secondQueContainer {
-    font-size: 17px;
-    display: flex; 
-    text-align: center;
-    flex-direction: row;
-    justify-content: start;
-    align-items: center;
-    color: #FF6F00;
-    margin-top: 2px;
-}
-
-.hoursChoice, .minutesChoice {
+    background-image: url('../img/1.jpg');
+    background-position: 55% center;
+    background-repeat: no-repeat;
+    background-size: cover;
     position: relative;
 }
-.hoursChoice select, .minutesChoice select{
-    font-size: 10px;
-    border: 1.5px solid #FF6F00;
-    border-radius: 7px;
-    background-color: #fff;
-    width: 40px;
-    height: 15px;
-    appearance: none; 
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    cursor: pointer;
-}
 
-.minutesChoice select:focus, .hoursChoice select:focus {
-    outline: none;
-    border-color: #FFA812;
-}
-
-.hoursChoice::after, .minutesChoice::after {
-    content: "▼"; 
+.IntroHeader::before {
+    content: "";
     position: absolute;
-    top: 13px;
-    left: 29px;
-    transform: translateY(-50%);
-    pointer-events: none; 
-    font-size: 6px;
-    color: #FF6F00;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.15); 
+    z-index: 1;
 }
 
-.label {
-    display: block;
-    text-align: center;
-    margin-left: 10px;
-    margin-bottom: 3px;
+.introTitleCont {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    border-radius: 10px;
+    z-index: 2;
+    transform: translate(-50%, -50%);
+    padding: 16px 12px;
+    min-width: 85%;
+    max-width: 95%;
+    background: rgba(0, 0, 0, 0.3); 
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+    text-align: center;  
+    color: #FFFFFF;
 }
 
-.minutesChoice {
-    margin-left: 13px;
+.subTitle {
+    font-family: 'Caveat', cursive;
+    font-size: 24px;
+    font-weight: 400;
+    color: #FFFFFF;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); 
 }
 
-.TretiyQueTitle {
-    margin-top: 18px;
+.introTitle {
+    font-family: 'ST-Nizhegorodsky';
+    font-size: 54px;
+    font-weight: 400;
+    color: #FFFFFF;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5); 
 }
 
-#thirdQuestion {
-    color: #000;
-    font-family: "Roboto", sans-serif;
-    font-size: 12px;
-    border-color: #FF6F00;
-    border-radius: 7px; 
-    margin-top: 5px;
-    width: 100%;
-    height: 27px;
-    /* max-height: 50px; */
-    outline: none;
-    resize: none;
-    overflow: hidden;
-    padding: 3px 8px;
-    vertical-align: middle;
+.TextInIntro {
+    margin-top: 12px;
+    font-family: 'Caveat', cursive;
+    font-size: 20px;
+    font-weight: 400;
+    color: #FFFFFF;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-#thirdQuestion::placeholder {
-    font-family: "Caveat", cursive;
-    color: #FFCCA5;
-    
-}
-
-.submitBtn {
-    margin-top: 35px;
-    text-align: center;
-    padding-left: 35px;
-    padding-right: 35px;
-
-}
-.send {
+.buttonToNextPage {
+    margin-top: 15px;
+    padding: 8px 16px;
     font-size: 18px;
-    display: block;
-    background-color: #FF7B00;
-    color: #fff;
-    text-align: center;
-    width: 100%;
-    height: 33px;
+    font-weight: 500;
+    color: #000;
+    background-color: #FFFFFF;
     border: none;
     border-radius: 5px;
-}
-
-
-.suggestions {
-    border: 1px solid #FF7B00;
-    background-color: #FFE9D5;
-    position: absolute;
-    z-index: 100;
-    width: 100px;
-    max-height: 150px;
-    overflow-y: auto;
-}
-
-.suggestion-item {
-    padding: 5px;
     cursor: pointer;
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s;
 }
 
-.suggestion-item:hover {
-    background-color: #FFD3A0;
+.buttonToNextPage:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.buttonToNextPage:active {
+    transform: scale(0.96);
 }
