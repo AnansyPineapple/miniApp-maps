@@ -77,7 +77,7 @@ def generate_route():
         ]
     }
     response = jsonify(result)
-    response = response.headers.add('Access-Control-Allow-Origin', '*')
+    response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
 def main():
@@ -112,4 +112,5 @@ def main():
 if __name__ == "__main__":
 
     main()
+
 
