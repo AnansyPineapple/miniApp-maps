@@ -9,7 +9,7 @@ if (routeData && routeData.places) {
       <div class="aboutObject">
         <div class="aboutObjHead">
           <div class="objTitle">
-            ${index + 1}. ${place.title}
+            ${place.title}
           </div>
           <div class="coordinates">
             <div class="street">
