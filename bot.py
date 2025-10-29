@@ -76,8 +76,15 @@ def define_categories(text):
     
     return list(set(found_categories))
 
-@flask_app.route('/generate_route', methods=['POST'])
+@flask_app.route('/generate_route', methods=['POST', 'OPTIONS'])
 def generate_route():
+    if request.method == 'OPTIONS':
+        response = jsonify({'status': 'ok'})
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', '*')
+        response.headers.add('Access-Control-Allow-Methods', '*')
+        return response
+    
     data = request.json
 
     query = data.get('query')
@@ -97,7 +104,7 @@ def generate_route():
         selected_places = pd.concat([selected_places, additional_places])
 
     result = []
-    for place in selected_places.iterrows():
+    for place in selected_places.to_dict():
         coords = place['coordinate'].replace("POINT (", "").replace(")", "").split()
         result.append({
             "title": place['title'],
