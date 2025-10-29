@@ -69,7 +69,9 @@ def generate_route():
             }
         ]
     }
-    return jsonify(result)
+    response = jsonify(result)
+    response = response.headers.add('Access-Control-Allow-Origin', '*')
+    return response
 
 def main():
     token = get_bot_token()
@@ -101,4 +103,5 @@ def main():
     #logger.info("Bot is running locally")
 
 if __name__ == "__main__":
+
     main()
