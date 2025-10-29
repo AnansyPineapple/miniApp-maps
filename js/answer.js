@@ -8,7 +8,7 @@ if (routeData && routeData.places) {
     const html = `
       <div class="aboutObject">
         <div class="aboutObjHead">
-          <div class="objTitle">${index + 1}. ${place.title}</div>
+          <div class="objTitle">${place.title}</div>
           <div class="coordinates">
             <div class="street"><span>${place.address}</span></div>
             <div class="path">
