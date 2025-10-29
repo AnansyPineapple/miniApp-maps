@@ -7,12 +7,13 @@ from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from flask import Flask, request, jsonify
 from flask_cors import CORS
+from threading import Thread
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-app = Flask(__name__)
-CORS(app)
+flask_app = Flask(__name__)
+CORS(flask_app)
 
 def get_bot_token():
     token = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -45,7 +46,7 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Чтобы начать работу необходимо запустить приложение!", reply_markup = reply_markup)
 
-@app.route('/generate_route', methods=['POST'])
+@flask_app.route('/generate_route', methods=['POST'])
 def generate_route():
     data = request.json
     print("Получен запрос:", data)
@@ -87,6 +88,8 @@ def main():
         full_webhook_url = f"{webhook_url}/{token}"
 
         logger.info("Bot is running from Render.com")
+
+        Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port)).start()
 
         app.run_webhook(
             listen="0.0.0.0", 
