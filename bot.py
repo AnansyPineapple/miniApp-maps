@@ -78,29 +78,27 @@ def main():
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
     
-    if os.getenv('RENDER'):
-        port = int(os.environ.get('PORT', 10000))
-        webhook_url = os.getenv('WEBHOOK_URL')
+    port = int(os.environ.get('PORT', 10000))
+    #webhook_url = os.getenv('WEBHOOK_URL')
         
-        if not webhook_url:
-            raise ValueError("WEBHOOK_URL was not set!")
+    #if not webhook_url:
+    #    raise ValueError("WEBHOOK_URL was not set!")
         
-        full_webhook_url = f"{webhook_url}/{token}"
+    #    full_webhook_url = f"{webhook_url}/{token}"
 
-        logger.info("Bot is running from Render.com")
+    logger.info("Bot is running from Render.com")
 
-        Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port)).start()
+    Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port)).start()
 
-        app.run_webhook(
-            listen="0.0.0.0", 
-            port=10000, 
-            webhook_url=full_webhook_url,
-            url_path=token
-            )
+        #app.run_webhook(
+        #    listen="0.0.0.0", 
+        #    port=10000, 
+        #    webhook_url=full_webhook_url,
+        #    url_path=token
+        #   )
         
-    else:
-        app.run_polling()
-        logger.info("Bot is running locally")
+    app.run_polling()
+    #logger.info("Bot is running locally")
 
 if __name__ == "__main__":
     main()
