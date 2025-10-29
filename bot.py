@@ -78,6 +78,8 @@ def define_categories(text):
 
 @flask_app.route('/generate_route', methods=['POST', 'OPTIONS'])
 def generate_route():
+    logger.info("generate_route called")
+    
     if request.method == 'OPTIONS':
         response = jsonify({'status': 'ok'})
         response.headers.add('Access-Control-Allow-Origin', '*')
@@ -95,9 +97,6 @@ def generate_route():
     request_categories = define_categories(query)
 
     ds = load_dataset()
-
-    if ds is None:
-        return jsonify({"error": "Dataset not loaded"}), 500
 
     list_of_places = ds[ds['category_id'].isin(request_categories)]
 
@@ -117,8 +116,10 @@ def generate_route():
             "description": place['description'],
             "reason": "В вашем запросе были подходящие слова!"
         })
-    result.headers.add('Access-Control-Allow-Origin', '*')
-    return jsonify(result)
+    
+    response = jsonify(result)
+    response.headers.add('Access-Control-Allow-Origin', '*')
+    return result
 
 def main():
     token = get_bot_token()

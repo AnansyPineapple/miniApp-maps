@@ -48,7 +48,7 @@ document.getElementById('routeForm').addEventListener('submit', async (e) => {
     minutes: minutesSelect.value,
     startPoint: thirdTextarea.value
   };
-
+  
   const response = await fetch('https://map-bot-3rhu.onrender.com/generate_route', {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
