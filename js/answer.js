@@ -10,12 +10,14 @@ if (routeData && routeData.places) {
         <div class="aboutObjHead">
           <div class="objTitle">${place.title}</div>
           <div class="coordinates">
-            <div class="street"><span>${place.address}</span></div>
-            <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <circle cx="5" cy="5" r="5" fill="#FF7B00"></circle>
-              <path d="M5.00016 16L0.66683 7.33333L9.3335 7.33333L5.00016 16Z" fill="#FF7B00"></path>
-              <circle cx="5" cy="5.5" r="2.5" fill="white"></circle>
-            </svg>
+            <div class="street">
+              <svg width="10" height="16" viewBox="0 0 10 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="5" cy="5" r="5" fill="#FF7B00"></circle>
+                <path d="M5.00016 16L0.66683 7.33333L9.3335 7.33333L5.00016 16Z" fill="#FF7B00"></path>
+                <circle cx="5" cy="5.5" r="2.5" fill="white"></circle>
+              </svg>
+              <span>${place.address}</span>
+            </div>
             <div class="path">
               <a href="https://yandex.ru/maps/?pt=${place.coord[1]},${place.coord[0]}&z=16&l=map" target="_blank">
                 ${place.coord[1]}, ${place.coord[0]}
