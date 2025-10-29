@@ -41,7 +41,7 @@ for(let i = 1; i <= 5; i++){
 document.getElementById('routeForm').addEventListener('submit', async (e) => {
   e.preventDefault();
   console.log("Кнопка нажата");
-  
+
   const data = {
     query: firstTextarea.value,
     hours: hoursSelect.value,

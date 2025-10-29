@@ -95,6 +95,10 @@ def generate_route():
     request_categories = define_categories(query)
 
     ds = load_dataset()
+
+    if ds is None:
+        return jsonify({"error": "Dataset not loaded"}), 500
+
     list_of_places = ds[ds['category_id'].isin(request_categories)]
 
     #Пока что логика - брать первые 3-5 мест или если их менее 3 то дополняем случайными
