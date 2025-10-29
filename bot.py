@@ -119,7 +119,7 @@ def generate_route():
     
     response = jsonify(result)
     response.headers.add('Access-Control-Allow-Origin', '*')
-    return result
+    return response
 
 def main():
     token = get_bot_token()
