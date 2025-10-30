@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Didact+Gothic&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/form.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <title>ourApp</title>
+</head>
+<body>
+    <section class="questionsSection">
+        <div class="mainBlockContainer">
+            <div class="mainTitle">
+                Создание индивидуального маршрута
+            </div>
+            <span class="lineBetweenTitleAndMain"></span>
+            <div class="formContainer">
+                <div class="formTitle">
+                    Каким должен быть ваш маршрут?
+                </div>
+                <form class="mainForm" id="routeForm">
+                    <textarea name="firstQuestion" id="firstQuestion" placeholder="он должен проходить через..." maxlength="10000" cols="30" rows="2" required></textarea>
+                    <div class="secondQueTitle">
+                        Какова длительность маршрута?
+                    </div>
+                    <div class="secondQueContainer">
+                        <div class="hoursChoice customDropdown" id="hoursDropdown">
+                            <div class="dropdownSelected" id="hoursSelected">—</div>
+                            <div class="dropdownList" id="hoursList">
+                                <div class="dropdownItem" data-value="1">1</div>
+                                <div class="dropdownItem" data-value="2">2</div>
+                                <div class="dropdownItem" data-value="3">3</div>
+                                <div class="dropdownItem" data-value="4">4</div>
+                                <div class="dropdownItem" data-value="5">5</div>
+                                <div class="dropdownItem" data-value="5">6</div>
+                                <div class="dropdownItem" data-value="5">7</div>
+                                <div class="dropdownItem" data-value="5">8</div>
+                                <div class="dropdownItem" data-value="5">9</div>
+                            </div>
+                            <label for="hoursDropdown">часов</label>
+                        </div>
+                        <div class="minutesChoice customDropdown" id="minutesDropdown">
+                            <div class="dropdownSelected" id="minutesSelected">—</div>
+                            <div class="dropdownList" id="minutesList">
+                                <div class="dropdownItem" data-value="15">0</div>
+                                <div class="dropdownItem" data-value="15">15</div>
+                                <div class="dropdownItem" data-value="30">30</div>
+                                <div class="dropdownItem" data-value="45">45</div>
+                            </div>
+                            <label for="minutesDropdown">минут</label>
+                        </div>
+                    </div>
+                    <div class="TretiyQueTitle">
+                        Где начнется маршрут?
+                    </div>
+                    <textarea name="thirdQuestion" id="thirdQuestion" placeholder="начните вводить адрес..." maxlength="10000" cols="30" rows="2" required></textarea>
+                    <div id="suggestionsContainer"></div>
+                    <div class="submitBtn">
+                        <button type="submit" class="send" >Отправить</button>
+                        <button class="back" onclick="window.location.href='/index.html'">Назад</button>
+                    </div>
+                </form>
+            </div>
+    </div>
+    </section>
+
+<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=e5f7b843-3605-4aea-824e-e5fd4cfffe96&suggest_apikey=2eacaf94-7d57-4c6e-800f-c1b879e57dcb" type="text/javascript"></script>    
+<script src="js/form.js"></script>
+<script src="js/suggsts.js"></script>
+</body>
+</html>

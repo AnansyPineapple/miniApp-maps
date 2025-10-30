@@ -6,6 +6,7 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Didact+Gothic&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="css/answer.css">
     <title>answer</title>
 </head>
@@ -13,11 +14,13 @@
     <section class="answerSection">
         <div class="mainBlockContainer">
             <div class="mainTitle">
-                Индивидуальный маршрут по Нижнему Новгороду
+                Ваш индивидуальный маршрут
             </div>
             <span class="lineBetweenTitleAndMain"></span>
             <div class="ansContainer">
-                <div class="mainMap" id="map"></div>
+                <div class="mapCont">
+                    <div class="mainMap" id="map"></div>
+                </div>
             </div>
             <div class="buttonsCont">
                     <button>Назад</button>
@@ -46,6 +49,9 @@
                 </div>
             </div>
         </div>
+    </div>
+    <div class="loadingOverlay" id="loadingOverlay">
+        <div class="loadingSpinner"></div>
     </div>
     <script src="https://api-maps.yandex.ru/2.1/?apikey=e5f7b843-3605-4aea-824e-e5fd4cfffe96&lang=ru_RU" type="text/javascript"></script>
     <script src="js/map.js"></script>

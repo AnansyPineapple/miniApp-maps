@@ -3,63 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&display=swap" rel="stylesheet">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
+     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/index.css">
-    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Didact+Gothic&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="/css/index.css">
     <title>ourApp</title>
 </head>
 <body>
-    <section class="questionsSection">
-        <div class="mainBlockContainer">
-            <div class="mainTitle">
-                Индивидуальный маршрут по Нижнему Новгороду
+    <section class="IntroHeader">
+        <div class="introTitleCont">
+            <div class="subTitle">
+                Добро пожаловать в
             </div>
-            <span class="lineBetweenTitleAndMain"></span>
-            <div class="formContainer">
-                <div class="formTitle">
-                    Каким должен быть ваш маршрут?
-                </div>
-                <form class="mainForm" id="routeForm">
-                    <textarea name="firstQuestion" id="firstQuestion" placeholder="он должен проходить через..." maxlength="10000" cols="30" rows="2" required></textarea>
-                    <div class="secondQueTitle">
-                        Какова длительность маршрута?
-                    </div>
-                    <div class="secondQueContainer">
-                        <div class="hoursChoice">
-                            <select id="hoursChoice" name="hoursChoice" required>
-                                <option value="" disabled selected></option>
-                                <!-- опции через js -->
-                            </select>
-                            <label for="hoursChoice">часов</label>
-                        </div>
-                        <div class="minutesChoice">
-                                <select id="minutesChoice" name="minutesChoice" required>
-                                <option value="" disabled selected></option>
-                                <!-- опции через js -->
-                            </select>
-                            <label for="minutesChoice">минут</label>
-                        </div>
-                    </div>
-                    <div class="TretiyQueTitle">
-                        Где начнется маршрут?
-                    </div>
-                    <textarea name="thirdQuestion" id="thirdQuestion" placeholder="начните вводить адрес..." maxlength="10000" cols="30" rows="2" required></textarea>
-                    <div id="suggestionsContainer"></div>
-                    <div class="submitBtn">
-                        <button type="submit" class="send" >Отправить</button>
-                    </div>
-                </form>
+            <div class="introTitle">
+                Нижний Новгород
             </div>
-    </div>
-    </section>
-
-<script src="https://api-maps.yandex.ru/2.1/?lang=ru_RU&apikey=e5f7b843-3605-4aea-824e-e5fd4cfffe96&suggest_apikey=2eacaf94-7d57-4c6e-800f-c1b879e57dcb" type="text/javascript"></script>    
-<script src="js/index.js"></script>
-<script src="js/suggsts.js"></script>
+            <div class="TextInIntro">
+                Создайте индивидуальный маршрут по городу всего за несколько минут!<br>
+                Просто ответьте на несколько вопросов, и мы подготовим для вас уникальный маршрут, учитывающий ваши интересы и предпочтения.
+            </div>
+            <button class="buttonToNextPage" onclick="window.location.href='/form.html'">
+                Начать!
+            </button>
+        </div>
+    </section>  
 </body>
-</html>
+</html> 

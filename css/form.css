@@ -1,0 +1,372 @@
+@font-face {
+    font-family: "ST-Nizhegorodsky";
+    src: url(ST-Nizhegorodsky/ST-Nizhegorodsky.ttf);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: "Didact Gothic", sans-serif;
+
+}
+
+body, html {
+    overflow-x: hidden;
+    background-color: #FFD6B2;
+}
+
+body {
+    height: 100%;
+}
+
+.questionsSection {
+    width: 100%;
+    height: 100vh;
+    background-image: url('../img/1.jpg');
+    background-position: 55% center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
+}
+
+.questionsSection::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.15);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 1;
+}
+
+.mainBlockContainer {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border-radius: 34px;
+    background: rgba(15, 15, 15, 0.85);
+    z-index: 2;
+    padding: 0;
+    min-width: 90%;
+    max-width: 95%;
+    text-align: center;
+    color: #FFFFFF;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1.5px solid rgba(255,255,255,0.10);
+    box-shadow: 0 8px 32px 0 rgba(0,0,0,0.25);
+}
+
+.mainTitle {
+    font-family: 'ST-Nizhegorodsky';
+    font-size: 28px;
+    font-weight: 400;
+    color: #FFFFFF;
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
+    margin-bottom: 5px;
+    text-align: center;
+    padding: 23.65px 0 19px;
+}
+
+.lineBetweenTitleAndMain {
+    display: block;
+    width: 100%;
+    height: 1.5px;
+    background-color: #fff;
+    margin: 0;
+}
+
+.formContainer {
+    font-size: 18px;
+    color: #fff;
+    padding: 31px 0 25px 0;
+    padding-left: 35px;
+    padding-right: 35px;
+    width: 100%;
+    box-sizing: border-box;
+    text-align: left;
+}
+.formTitle {
+    margin-bottom: 5px;
+}
+.mainForm {
+    width: 100%;
+}
+
+.secondQueTitle {
+    margin-bottom: 8px;
+}
+
+.formTitle, .secondQueTitle, .TretiyQueTitle {
+    color: #fff;
+    text-align: left;
+}
+
+.TextInIntro, .formContainer, .formTitle, .secondQueTitle, .TretiyQueTitle {
+    color: #fff;
+}
+
+#firstQuestion {
+    font-family: "Didact Gothic", sans-serif;
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-size: 12px;
+    border: 1.5px solid #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    margin-top: 5px;
+    margin-bottom: 15px;
+    width: 100%;
+    min-height: 65px;
+    max-height: 150px;
+    outline: none;
+    resize: none;
+    padding: 7px 8px;
+    overflow: hidden;
+}
+
+#firstQuestion::placeholder {
+    color: #fff;
+    opacity: 0.7;
+    font-family: "Didact Gothic", sans-serif;
+}
+
+.secondQueContainer {
+    font-size: 21.25px;
+    display: flex;
+    text-align: center;
+    flex-direction: row;
+    justify-content: flex-start;
+    align-items: center;
+    color: #fff;
+    margin-top: 5px;
+    gap: 34px;
+}
+
+.hoursChoice, .minutesChoice {
+    position: relative;
+}
+
+.hoursChoice select, .minutesChoice select {
+    font-size: 10px;
+    border: 1.5px solid #fff;
+    border-radius: 7px;
+    background-color: #fff;
+    width: 40px;
+    height: 15px;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    cursor: pointer;
+}
+
+.minutesChoice select:focus, .hoursChoice select:focus {
+    outline: none;
+    border-color: #FFA812;
+}
+
+.hoursChoice::after, .minutesChoice::after {
+    display: none;
+}
+
+.label {
+    display: block;
+    text-align: center;
+    margin-left: 10px;
+    margin-bottom: 3px;
+}
+
+.minutesChoice {
+    margin-left: 13px;
+}
+
+.TretiyQueTitle {
+    margin-top: 18px;
+}
+
+#thirdQuestion {
+    background: rgba(255,255,255,0.08);
+    color: #fff;
+    font-family: "Didact Gothic", sans-serif;
+    font-size: 12px;
+    border: 1.5px solid #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+    margin-top: 5px;
+    width: 100%;
+    height: 27px;
+    outline: none;
+    resize: none;
+    overflow: hidden;
+    padding: 3px 8px;
+    vertical-align: middle;
+}
+
+#thirdQuestion::placeholder {
+    color: #fff;
+    opacity: 0.7;
+    font-family: "Didact Gothic", sans-serif;
+
+}
+
+.submitBtn {
+    margin-top: 28px;
+    margin-bottom: 2px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 9px;
+}
+
+.submitBtn button {
+    width: 175px;
+    height: 33px;
+    font-size: 18px;
+    font-weight: 500;
+    color: #000;
+    background-color: #FFFFFF;
+    border: none;
+    border-radius: 7px;
+    cursor: pointer;
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s;
+}
+
+
+.submitBtn button:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+}
+
+.submitBtn button:active {
+    transform: scale(0.96);
+}
+
+.suggestions {
+    border: 1px solid #fff;
+    background: rgba(30,32,36,0.98);
+    color: #fff;
+    position: absolute;
+    z-index: 100;
+    width: 100px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+
+.suggestion-item {
+    color: #fff;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background: rgba(255,255,255,0.12);
+}
+
+.customDropdown {
+    position: relative;
+    display: flex;
+    align-items: center;
+    min-width: 60px;
+    max-width: 60px;
+    height: 28px;
+    margin-right: 12px;
+    font-size: 20px;
+    color: #fff;
+    background: rgba(255,255,255,0.08);
+    border-radius: 14px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.10);
+}
+
+.dropdownSelected {
+    background: rgba(255,255,255,0.18);
+    color: #fff;
+    border: 1.5px solid #fff;
+    border-radius: 14px;
+    padding: 2px 22px 2px 12px;
+    cursor: pointer;
+    min-width: 60px;
+    max-width: 60px;
+    height: 28px;
+    user-select: none;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    box-shadow: 0 2px 8px rgba(255,123,0,0.07);
+    margin-right: 6px;
+    font-size: 18px;
+    line-height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    box-sizing: border-box;
+}
+
+.dropdownSelected.empty {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+.dropdownSelected::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    right: 8.75px;
+    width: 0;
+    height: 0;
+    border-left: 5px solid transparent;
+    border-right: 5px solid transparent;
+    border-top: 6.25px solid #fff;
+    transform: translateY(-50%);
+    pointer-events: none;
+    display: block;
+}
+
+.dropdownList {
+    display: none;
+    position: absolute;
+    left: 0;
+    top: 110%;
+    background: rgba(15, 15, 15, 0.85); 
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 14px;
+    box-shadow: 0 8px 24px rgba(255,123,0,0.18);
+    z-index: 100;
+    min-width: 60px;
+    max-width: 60px;
+    max-height: 180px;
+    overflow-y: auto;
+    animation: dropdownOpen 0.18s cubic-bezier(0.4,0,0.2,1);
+    color: #fff;
+}
+
+.customDropdown.open .dropdownList {
+    display: block;
+}
+
+.dropdownItem {
+    padding: 6px 10px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 18px;
+    transition: background 0.15s;
+}
+
+.dropdownItem:hover {
+    background: #FFD3A0;
+}
+
+.customDropdown label {
+    margin-left: 0;
+    color: #fff;
+    font-size: 18px;
+    vertical-align: middle;
+    padding: 0;
+    line-height: 1;
+    position: static;
+}
+
+@keyframes dropdownOpen {
+    0% { opacity: 0; transform: translateY(-8px); }
+    100% { opacity: 1; transform: translateY(0); }
+}

@@ -1,3 +1,10 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        overlay.classList.add('active');
+    }
+});
+
 const routeData = JSON.parse(localStorage.getItem('routeData'));
 
 if (routeData && Array.isArray(routeData)) {
@@ -177,5 +184,14 @@ document.querySelector('.buttonsCont button:last-child').addEventListener('click
 
 
 document.querySelector('.buttonsCont button:first-child').addEventListener('click', () => {
-    window.location.href = 'index.html';
+    window.location.href = 'form.html';
+});
+
+window.addEventListener('load', () => {
+    const overlay = document.getElementById('loadingOverlay');
+    if (overlay) {
+        setTimeout(() => {
+            overlay.classList.remove('active');
+        }, 350); // небольшая задержка для плавности
+    }
 });
