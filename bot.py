@@ -98,7 +98,7 @@ def generate_route():
 
     ds = load_dataset()
 
-    list_of_places = ds[ds['category_id'].isin(request_categories)].drop_duplicates(subset=['title'])
+    list_of_places = ds[ds['category_id'].isin(request_categories)]
 
     #Пока что логика - брать первые 3-5 мест или если их менее 3 то дополняем случайными 
     selected_places = list_of_places.head(min(5, len(list_of_places)))
