@@ -16,7 +16,7 @@ function init() {
         let promises = [];
 
         //Добавляем стартовую точку
-        const start_point = map.geocode(routeData.startPoint, {results: 1})
+        const start_point = ymaps.geocode(routeData.startPoint, {results: 1})
             .then(function (start) {
                 const coords = start.geoObjects.get(0).geometry.getCoordinates();
                 points.unshift(coords);
