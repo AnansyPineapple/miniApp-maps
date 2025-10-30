@@ -13,14 +13,14 @@ function init() {
 
     if (routeData && routeData.places && Array.isArray(routeData.places)) {
         //Добавляем стартовую точку
-        map.geocode(routeData.startPoint, {results: 1}).then(function (start_point) {
-            const start_placemark = new ymaps.Placemark(
-                start_point.geoObjects.get(0).geometry.getCoordinates(),
-                {balloonContent: "Start Point"},
-                {preset: "islands#redDotIcon" }
-            );
-            map.geoObjects.add(start_placemark);
-        });
+        //map.geocode(routeData.startPoint, {results: 1}).then(function (start_point) {
+        //    const start_placemark = new ymaps.Placemark(
+        //        start_point.geoObjects.get(0).geometry.getCoordinates(),
+       //         {balloonContent: "Start Point"},
+       //         {preset: "islands#redDotIcon" }
+        //    );
+        //    map.geoObjects.add(start_placemark);
+       // });
 
         //Добавляем остальные точки
         routeData.places.forEach((place, index) => {
