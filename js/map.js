@@ -13,7 +13,7 @@ function init() {
 
     if (routeData && routeData.places && Array.isArray(routeData.places)) {
         //Добавляем стартовую точку
-        ymaps.geocode(routeData.startPoint, {results: 1}).then(function (start_point) {
+        map.geocode(routeData.startPoint, {results: 1}).then(function (start_point) {
             const start_placemark = new ymaps.Placemark(
                 start_point.geoObjects.get(0).geometry.getCoordinates(),
                 {balloonContent: "Start Point"},
