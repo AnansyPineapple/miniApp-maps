@@ -1,13 +1,14 @@
 @font-face {
     font-family: "ST-Nizhegorodsky";
-    src: url(/miniApp-maps/css/ST-Nizhegorodsky/ST-Nizhegorodsky.ttf);
+    src: url(ST-Nizhegorodsky/ST-Nizhegorodsky.ttf);
 }
 
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: "Caveat", cursive;
+    font-family: "Didact Gothic", sans-serif;
+
 }
 
 body, html {
@@ -17,47 +18,64 @@ body, html {
 
 body {
     height: 100%;
-    
 }
 
-
-
 .answerSection {
+    width: 100%;
+    height: 100vh;
+    background-image: url('../img/1.jpg');
+    background-position: 55% center;
+    background-repeat: no-repeat;
+    background-size: cover;
+    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 100vh;
+}
 
+.answerSection::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.15);
+    z-index: 1;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .mainBlockContainer {
     position: relative;
     display: flex;
     flex-direction: column; 
-    border: 1.5px solid #FFA812;
-    border-radius: 10px;
-    background-color: #fff;
-    width: 100%;
-    max-width: 340px;
-    height: 600px;
+    border-radius: 34px;
+    background: rgba(15, 15, 15, 0.85);
+    z-index: 2;
+    color: #fff;
+    border: none;
+    box-shadow: 0 8px 32px 0 rgba(0,0,0,0.25);
+    width: 90%;
+    max-width: 95%;
+    height: 700px;
 }
 
 .mainTitle {
     font-family: 'ST-Nizhegorodsky';
-    font-size: 19px;
+    font-size: 28px;
     font-weight: 400;
-    color: #FF7B00;
+    color: #fff;
     text-align: center;
     padding: 23.65px 0 19px;
     flex-shrink: 0; 
+    text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5);
 }
 
 .lineBetweenTitleAndMain {
     display: block;
     width: 100%;
     height: 1.5px;
-    background-color: #FFA410;
+    background-color: #fff;
     flex-shrink: 0;
+    margin: 0;
 }
 
 .ansContainer {
@@ -66,24 +84,31 @@ body {
     margin: 0 29px;
     scrollbar-width: none; 
     -ms-overflow-style: none;
+    color: #fff;
 }
 
 .ansContainer::-webkit-scrollbar {
     display: none; 
 }
 
+.mapCont {
+    display: flex;
+    justify-content: center;
+}
 .mainMap {
-    width: 100%;
     height: 300px;
-    border: 1px solid #FFA812;
+    border: 2px solid #fff;
     border-radius: 5px;
     margin-top: 20px;
     margin-bottom: 15px;
 }
+.mainMap:first-child {
+    border-radius: 5px;
+}
 
 .aboutObject {
     width: 100%;
-    border: 1px solid #FFA812;
+    border: 1.5px solid #fff;
     border-radius: 5px;
     margin-bottom: 10px;
 }
@@ -119,23 +144,23 @@ body {
 }
 
 .path a {
-    color:#FF7B00;
+    color: #fff;
     text-decoration: underline;
 }
 
 .objDescriptionWrapper {
     overflow: hidden;
     position: relative;
-    border-top: 1px dashed #FF7B00;
-    border-bottom: 1px dashed #FF7B00;
-    background-color: #FFE9D5;
+    border-top: 1px dashed #fff;
+    border-bottom: 1px dashed #fff;
+    background-color: rgba(255,255,255,0.08);
     padding: 6px 5px;
 }
 
 .objDescription {
     width: 100%;
-    font-size: 12px;
-    color: #FF7B00;
+    font-size: 14px;
+    color: #fff;
     padding: 0 6px;
     text-decoration: underline;
 }
@@ -151,43 +176,53 @@ body {
 
 
 .ObjFooter {
-    font-size: 12px;
-    color: #FF7B00;
+    font-size: 14px;
+    color: #fff;
     text-decoration: underline;
     text-align: center;
     margin: 9px 0;
 }
 
-
+.ObjFooter svg {
+    fill: #fff !important;
+    color: #fff !important;
+    stroke: #fff !important;
+}
 
 .buttonsCont {
     position: relative; 
     display: flex;
     justify-content: center;
     align-items: center;
-    padding: 17px 0;
-    border-top: 1px solid #FF7E01;
-    box-shadow: 0 -4px 10px -4px rgba(0, 0, 0, 0.25);
+    gap: 9px;
+    padding: 17px 25px;
+    border-top: 1px solid #fff;
+    box-shadow: 0 -4px 10px -4px rgba(0, 0, 0, 0.5);
     border-radius: 0 0 10px 10px;
-    background-color: #fff;
+    background-color: transparent;
     flex-shrink: 0; 
 }
 
 .buttonsCont button {
-    background-color: #FF7B00;
-    color: #fff;
+    /* background-color: #fff; */
+    color: #000;
     font-size: 18px;
-    font-weight: 100;
-    width: 145px;
+    font-weight: 500;
+    width: 100%;
     height: 33px;
     border: none;
-    border-radius: 8px;
+    border-radius: 7px;
+    transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.15s;
 }
 
-.buttonsCont button:first-child {
-    margin-right: 9px;
+.buttonsCont button:hover {
+    transform: scale(1.08);
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
 }
 
+.buttonsCont button:active {
+    transform: scale(0.96);
+}
 
 
 
@@ -214,17 +249,17 @@ body {
 }
 
 .modalWindow {
-    background: #fff;
-    border: 1px solid #FFA812;
-    border-radius: 10px;
-    width: 90%;
-    max-width: 340px;
-    height: 500px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    background: rgba(15, 15, 15, 0.85); 
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 34px;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    color: #fff;
     display: flex;
     flex-direction: column;
-    transform: translateY(-50px);
-    opacity: 0;
+    max-width: 340px;
+    height: 500px;
     transition: all 0.3s ease;
 }
 
@@ -235,13 +270,13 @@ body {
 
 .modalHeader {
     font-family: 'ST-Nizhegorodsky';
-    font-size: 20px;
+    font-size: 32px;
     font-weight: 400;
-    color: #FF7B00;
+    color: #fff;
     text-align: center;
     padding: 23.65px 0 19px;
     flex-shrink: 0; 
-    border-bottom: 1px solid #FFA812;
+    border-bottom: 1px solid #fff;
     
 }
 
@@ -262,13 +297,13 @@ body {
     flex: 1;
     overflow-y: auto;
     font-size: 18px;
-    color: #FF7B00;
+    color: #fff;
     text-align: center;
     max-height: 400px;
     padding: 28px 18px 0 18px;
     scrollbar-width: none; 
     -ms-overflow-style: none;
-
+    margin-bottom: 15px;
 }
 
 .modalBtnCont {
@@ -276,51 +311,65 @@ body {
     display: flex;
     justify-content: center;
     padding: 17px 0;
-    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.25);
+    box-shadow: 0 -2px 10px rgba(255, 255, 255, 0.5);
 }
 
 .modalCloseBtn {
-    background-color: #FF7B00;
-    color: #fff;
-    font-size: 18px;
+    background-color: #fff;
+    color: #000;
+    font-size: 20px;
+    font-weight: 400;
     border: none;
     border-radius: 7px;
-    font-size: 16px;
     cursor: pointer;
     width: 145px;
     height: 33px;
 }
 
+
+.street svg,
+.path svg {
+    fill: #fff !important;
+    color: #fff !important;
+    stroke: #fff !important;
+}
+
+
 .loadingOverlay {
     position: fixed;
     top: 0;
     left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: rgba(255,255,255,1);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
+    width: 100%;
+    height: 100%;
+    display: none; 
     justify-content: center;
+    align-items: center;
+    z-index: 200;
+    background: rgba(117, 117, 117, 0.08);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    transition: opacity 0.3s ease;
     opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.4s cubic-bezier(0.4,0,0.2,1);
 }
+
 .loadingOverlay.active {
+    display: flex;
     opacity: 1;
-    pointer-events: all;
 }
+
+
 .loadingSpinner {
     width: 60px;
     height: 60px;
-    border: 6px solid #FF7B00;
-    border-top: 6px solid #fff;
+    border: 4px solid rgba(255, 255, 255, 0.5);
+    border-top: 4px solid #000;
     border-radius: 50%;
     animation: spin 1s linear infinite;
+    box-shadow: 0 0 20px rgba(93, 93, 93, 0.4);
+    backdrop-filter: blur(4px);
 }
+
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
 }
-
-
