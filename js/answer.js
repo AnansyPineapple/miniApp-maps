@@ -192,6 +192,6 @@ window.addEventListener('load', () => {
     if (overlay) {
         setTimeout(() => {
             overlay.classList.remove('active');
-        }, 350); // небольшая задержка для плавности
+        }, 350); 
     }
 });
