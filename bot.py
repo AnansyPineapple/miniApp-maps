@@ -98,10 +98,10 @@ def generate_route():
 
     ds = load_dataset()
 
-    list_of_places = ds[ds['category_id'].isin(request_categories)]
+    list_of_places = ds[ds['category_id'].isin(request_categories)].drop_duplicates(subset=['title'])
 
     #Пока что логика - брать первые 3-5 мест или если их менее 3 то дополняем случайными 
-    selected_places = list_of_places.head(random.randint(3,5))
+    selected_places = list_of_places.head(min(5, len(list_of_places)))
     if len(selected_places) < 3:
         additional_places = ds.sample(3 - len(selected_places))
         selected_places = pd.concat([selected_places, additional_places])
@@ -152,8 +152,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
