@@ -7,11 +7,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 const routeData = JSON.parse(localStorage.getItem('routeData'));
 
-if (routeData && Array.isArray(routeData)) {
+if (routeData && routeData.places && Array.isArray(routeData.places)) {
   const container = document.querySelector('.ansContainer');
   container.innerHTML = '<div class="mapBlock"><div class="mainMap" id="map"></div></div>';
 
-  routeData.forEach((place, index) => {
+  routeData.places.forEach((place, index) => {
     const html = `
       <div class="aboutObject">
         <div class="aboutObjHead">

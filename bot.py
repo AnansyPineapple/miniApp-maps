@@ -106,10 +106,14 @@ def generate_route():
         additional_places = ds.sample(3 - len(selected_places))
         selected_places = pd.concat([selected_places, additional_places])
 
-    result = []
+    result = {
+        "startPoint": startPoint,
+        "places": []
+    }
+
     for _, place in selected_places.iterrows():
         coords = place['coordinate'].replace("POINT (", "").replace(")", "").split()
-        result.append({
+        result["places"].append({
             "title": place['title'],
             "address": place['address'],
             "coord": [coords[0], coords[1]],
