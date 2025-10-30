@@ -13,13 +13,12 @@ function init() {
 
     if (routeData && routeData.places && Array.isArray(routeData.places)) {
         const points = [];
-        let promises = [];
 
         //Добавляем стартовую точку
         const start_point = ymaps.geocode(routeData.startPoint, {results: 1})
             .then(function (start) {
                 const coords = start.geoObjects.get(0).geometry.getCoordinates();
-                points.unshift(coords);
+                points.push(coords);
 
                 const start_placemark = new ymaps.Placemark(
                     coords,
@@ -28,7 +27,6 @@ function init() {
                 );
                 map.geoObjects.add(start_placemark);
             });
-        promises.push(start_point);
 
         //Добавляем остальные точки
         routeData.places.forEach((place, index) => {
@@ -43,8 +41,8 @@ function init() {
             map.geoObjects.add(placemark);
         });
 
-        Promise.all(promises).then(() => {
-            const multiRoute = ymaps.multiRouter.MultiRoute({
+        start_point.then(() => {
+            const multiRoute = new ymaps.multiRouter.MultiRoute({
                 referencePoints: points,
             },{
                 editorDrawOver: false,
@@ -58,8 +56,8 @@ function init() {
             });
 
             map.geoObjects.add(multiRoute);
-
-            multiRoute.event.once('update', function() {
+        
+            multiRoute.events.once('update', function() {
                 const routes = multiRoute.getRoutes();
                 for (let i = 0, l = routes.getLength(); i < l; i++) {
                     const route = routes.get(i);
