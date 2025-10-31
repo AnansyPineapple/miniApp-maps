@@ -261,11 +261,13 @@ def generate_route():
 
         total_min = 0
         for _, place in selected_places.iterrows():
+            category_id = place['category_id']
+            cat_time = categories_time.get(category_id, 30)
             total_min += cat_time
             total_min += 30
         
-        total_h = total_min//60
-        mins = total_min%60
+        total_h = (total_min-30)//60
+        mins = (total_min-30)%60
         totalTime = f"{total_h}.{mins:02d}"
 
         result = {
@@ -343,21 +345,18 @@ def main():
     logger.info("Bot running on Render")
     logger.info(f"Webhook URL: {full_webhook_url}")
 
-    #Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port, debug=False)).start()
-    #@flask_app.route(f"/{token}", methods=["POST"])
-    #def telegram_webhook():
-    #    update = Update.de_json(request.get_json(force=True), app.bot)
-    #    app.update_queue.put_nowait(update)
-    #    return jsonify({"ok": True})
-
-    @flask_app.route(f'/{token}', methods=['POST'])
+    async def set_webhook():
+        await app.bot.set_webhook(url=full_webhook_url)
+        
+    @flask_app.route(f"/{token}", methods=["POST"])
     def telegram_webhook():
-        update = Update.de_json(request.get_json(), app.bot)
+        update = Update.de_json(request.get_json(force=True), app.bot)
         app.update_queue.put_nowait(update)
-        return 'ok'
+        return jsonify({"ok": True})
 
     flask_app.run(host='0.0.0.0', port=port, debug=False)
 
 
 if __name__ == "__main__":
     main()
+
