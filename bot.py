@@ -90,6 +90,7 @@ logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
 
 #Сама модель для работы с запросом
 model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+model = model.half()
 
 #Наши категории из таблицы
 category_names = [
@@ -105,7 +106,9 @@ category_names = [
     "Монументально-декоративное искусство",
     "Рестораны и кафе",
     "Кофейни",
-    "Кондитерские и пекарни"
+    "Кондитерские и пекарни",
+    "Торговые центры",
+    "Места для развлечения"
 ]
 
 #Перевод для дальнейшего сравнения
