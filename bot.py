@@ -213,7 +213,8 @@ def generate_route():
 
     ds = load_dataset()
 
-    list_of_places = ds[ds['category_id'].isin(request_categories)]
+    top_categories_ids = [cid for cid, score in request_categories]
+    list_of_places = ds[ds['category_id'].isin(top_categories_ids)]
 
     # Пока что логика - брать первые 3-5 мест или если их менее 3 то дополняем случайными
     selected_places = list_of_places.head(min(5, len(list_of_places)))
@@ -301,3 +302,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
