@@ -108,7 +108,8 @@ def generate_route():
 
     result = {
         "startPoint": startPoint,
-        "places": []
+        "places": [],
+        "time": f"{hours}.{minutes}"
     }
 
     for _, place in selected_places.iterrows():
