@@ -326,10 +326,6 @@ def test2():
     print("Все кандидаты для маршрута:")
     print(candidates[['title', 'category_id', 'score']].sort_values(by='score', ascending=False))
 
-def run_flask():
-    port = int(os.environ.get('PORT', 10000))
-    logger.info(f"Starting Flask server on port {port}")
-    flask_app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
 
 def main():
     token = get_bot_token()
@@ -337,44 +333,33 @@ def main():
 
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-
+    
     port = int(os.environ.get('PORT', 10000))
-    webhook_url = os.getenv('WEBHOOK_URL')
-    if not webhook_url:
-        raise ValueError("WEBHOOK_URL was not set!")
+    #webhook_url = os.getenv('WEBHOOK_URL')
+        
+    #if not webhook_url:
+    #    raise ValueError("WEBHOOK_URL was not set!")
+        
+    #    full_webhook_url = f"{webhook_url}/{token}"
 
-    full_webhook_url = f"{webhook_url}/{token}"
+    logger.info("Bot is running from Render.com")
 
-    # Flask route для Telegram webhook
-    @flask_app.route(f"/{token}", methods=["POST"])
-    def telegram_webhook():
-        try:
-            update = Update.de_json(request.get_json(force=True), app.bot)
-            app.update_queue.put_nowait(update)
-            return jsonify({"ok": True})
-        except Exception as e:
-            logger.error(f"Error in telegram webhook: {e}")
-            return jsonify({"ok": False, "error": str(e)}), 500
+    Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port, debug=False)).start()
 
-    import asyncio
-    from threading import Thread
-
-    async def setup_and_run():
-        await app.bot.set_webhook(url=full_webhook_url)
-        logger.info(f"Webhook set to {full_webhook_url}")
-
-        Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False), daemon=True).start()
-
-        await app.initialize()
-        await app.start()
-        await app.updater.start_polling()
-        await app.updater.idle()
-
-    asyncio.run(setup_and_run())
+        #app.run_webhook(
+        #    listen="0.0.0.0", 
+        #    port=10000, 
+        #    webhook_url=full_webhook_url,
+        #    url_path=token
+        #   )
+        
+    app.run_polling()
+    #logger.info("Bot is running locally")
 
 
 if __name__ == "__main__":
     main()
+
 
 
 
