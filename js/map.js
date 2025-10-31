@@ -28,7 +28,7 @@ function init() {
 
                 //Добавляем остальные точки
                 routeData.places.forEach((place, index) => {
-                    const coords = [place.coord[1], place.coord[0]];
+                    const coords = [place.coord[0], place.coord[1]];
                     points.push(coords);
 
                     const placemark = new ymaps.Placemark(
