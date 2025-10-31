@@ -9,6 +9,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from threading import Thread
 import random
+from sentence_transformers import SentenceTransformer, util
+import torch
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -83,6 +85,102 @@ def define_categories(text):
 
     return list(set(found_categories))
 
+#Чтобы в консоль не было информировании о запуске модели
+logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
+
+#Сама модель для работы с запросом
+model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+
+#Наши категории из таблицы
+category_names = [
+    "Памятники и скульптуры",
+    "Парки, скверы и зоны отдыха",
+    "Макеты архитектурных объектов",
+    "Набережные",
+    "Архитектура и исторические здания",
+    "Культурно-досуговые центры и библиотеки",
+    "Музеи и выставочные пространства",
+    "Театры и филармонии",
+    "Инфраструктура",
+    "Монументально-декоративное искусство",
+    "Рестораны и кафе",
+    "Кофейни",
+    "Кондитерские и пекарни"
+]
+
+#Перевод для дальнейшего сравнения
+category_embeddings = model.encode(category_names, convert_to_tensor=True, show_progress_bar=False)
+
+#Перегрузка функции, которая возвращает топ категории мест
+def define_categories(text, similarity_threshold=0.5, min_categories=3, max_categories=5):
+    """
+    Определяет топ категорий для запроса пользователя с использованием sentence-transformers.
+
+    Параметры:
+        text (str) - текст запроса пользователя
+        similarity_threshold (float) - минимальное значение косинусного сходства для включения категории
+        min_categories (int) - минимальное количество категорий в топе
+        max_categories (int) - максимальное количество категорий в топе
+
+    Возвращает:
+        list of tuples: [(category_id, score), ...] — топ категорий с их схожестью
+    """
+
+#Кодируем запрос в вектор с помощью модели sentence-transformers.
+    query_emb = model.encode(text, convert_to_tensor=True, show_progress_bar=False)
+#Считаем косинусное сходство запроса с векторами категорий.
+    similarities = util.cos_sim(query_emb, category_embeddings)[0]
+
+#Сортируем категории по схожести.
+    sorted_indices = torch.argsort(similarities, descending=True).tolist()
+    sorted_scores = similarities[sorted_indices].tolist()
+
+    found=[]
+
+#Добавляем в результат только те, у которых сходство ≥ similarity_threshold.
+    for idx, score in zip(sorted_indices, sorted_scores):
+        if score >= similarity_threshold:
+            found.append((idx+1, score))
+        if len(found) >= max_categories:
+            break
+#Если найдено меньше min_categories, добавляем следующие по схожести, чтобы гарантировать минимум.
+    if len(found) < min_categories:
+        for idx, score in zip(sorted_indices, sorted_scores):
+            if (idx + 1, score) not in found:
+                found.append((idx + 1, score))
+            if len(found) >= min_categories:
+                break
+
+#Возвращаем список кортежей (category_id, score).
+    return found[:max_categories]
+
+def get_candidate_places(query, ds):
+    """
+    Формирует массив всех мест, соответствующих топ-категориям запроса.
+
+    Параметры:
+        query (str) - текст запроса пользователя
+        ds (pd.DataFrame) - датасет с местами, должен содержать колонки:
+            'title', 'address', 'coordinate', 'description', 'category_id'
+
+    Возвращает:
+        pd.DataFrame - все места из топ-категорий с добавленным столбцом 'score'
+    """
+    #Вызываем define_categories(query) для определения топ категорий.
+    top_categories_with_score = define_categories(query)
+
+    top_categories_ids=[cid for cid, score in top_categories_with_score]
+
+    #Берём все места из датасета, у которых category_id входит в топ.
+    candidate_places=ds[ds['category_id'].isin(top_categories_ids)].copy()
+
+    #Добавляем столбец score, соответствующий релевантности категории запросу.
+    score_dict = {cid: score for cid, score in top_categories_with_score}
+    candidate_places['score']=candidate_places['category_id'].apply(lambda x: score_dict.get(x, 0))
+
+    #Возвращаем DataFrame с кандидатами для маршрута.
+    return candidate_places
+
 
 @flask_app.route('/generate_route', methods=['POST', 'OPTIONS'])
 def generate_route():
@@ -133,6 +231,34 @@ def generate_route():
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
 
+#Тест функции по схожести запроса и категорий
+def test1():
+    test_queries = [
+        "Хочу прогуляться по парку и посмотреть памятники",
+        "Ищу хороший ресторан с кофе и десертами",
+        "Посетить музей и выставку искусства",
+        "Прогуляться по набережной Волги",
+        "Что-то историческое и архитектурное"
+    ]
+    for query in test_queries:
+        categories_found = define_categories(query)
+        print(f"Запрос: {query}")
+        for cat_id, score in categories_found:
+            label = category_names[cat_id - 1]
+            if score is not None:
+                print(f"  Категория {cat_id}: {label}, схожесть = {score:.3f}")
+            else:
+                print(f"  Категория {cat_id}: {label} (fallback)")
+        print("-" * 40)
+
+#Тест на составление таблицы кандидатов
+def test2():
+    ds = load_dataset()
+    query="Хочу прогуляться по парку и посмотреть памятники"
+    candidates = get_candidate_places(query, ds)
+    print("Все кандидаты для маршрута:")
+    print(candidates[['title', 'category_id', 'score']].sort_values(by='score', ascending=False))
+
 
 def main():
     token = get_bot_token()
@@ -165,4 +291,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    test1()
+#    test2()
+#    main()
