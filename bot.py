@@ -5,7 +5,7 @@ import json
 from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, make_response
 from flask_cors import CORS
 from threading import Thread
 import random
@@ -17,20 +17,14 @@ import numpy as np
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-flask_app = Flask(__name__)
-CORS(flask_app, resources={
-    r"/generate_route": {
-        "origins": ["https://anansypineapple.github.io", "http://localhost:3000"],
-        "methods": ["POST", "OPTIONS"],
-        "allow_headers": ["Content-Type"]
-    }
-})
-    
 HF_API_TOKEN = os.getenv('HF_API_TOKEN')
 HF_API_URL = "https://router.huggingface.co/hf-inference/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 headers = {
     "Authorization": f"Bearer {os.environ['HF_API_TOKEN']}",
 }
+
+flask_app = Flask(__name__)
+CORS(flask_app)
 
 def get_bot_token():
     token = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -83,26 +77,25 @@ def get_embeddings(texts):
         texts = [texts]
     
     try:
-        HF_API_URL = "https://router.huggingface.co/hf-inference/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-        
         response = requests.post(
-            HF_API_URL, 
-            headers=headers, 
+            HF_API_URL,
+            headers=HEADERS,
             json={"inputs": texts, "options": {"wait_for_model": True}},
             timeout=30
         )
-        
         if response.status_code == 200:
-            return response.json()
+            data = response.json()
+            if isinstance(data, list) and isinstance(data[0], dict) and "embedding" in data[0]:
+                return [item["embedding"] for item in data]
+            return data
         else:
-            print(f"Ошибка HF API: {response.status_code} - {response.text}")
+            logger.error(f"Ошибка HF API: {response.status_code} - {response.text}")
             return None
     except Exception as e:
-        print(f"Исключение при запросе к HF API: {e}")
+        logger.error(f"Исключение при запросе к HF API: {e}")
         return None
-    
-def load_category_embeddings():
-    category_names = [
+
+category_names = [
         "Памятники и скульптуры",
         "Парки, скверы и зоны отдыха",
         "Макеты архитектурных объектов",
@@ -120,9 +113,13 @@ def load_category_embeddings():
         "Места для развлечения"
     ]
     
+def load_category_embeddings():
     embeddings = get_embeddings(category_names)
     if embeddings:
         return torch.tensor(embeddings)
+    else:
+        logger.error("Не удалось получить эмбеддинги категорий")
+        return None
 
 category_embeddings = load_category_embeddings()
 
@@ -145,7 +142,13 @@ def define_categories(text, similarity_threshold=0.5, min_categories=3, max_cate
     """
 
 #Кодируем запрос в вектор с помощью модели sentence-transformers.
+    if category_embeddings is None:
+        return []
+    
     query_emb = get_embeddings(text)
+    if not query_emb:
+        return []
+    
     query_emb = torch.tensor(query_emb)
 #Считаем косинусное сходство запроса с векторами категорий.
     similarities = util.cos_sim(query_emb, category_embeddings)[0]
@@ -207,9 +210,6 @@ def generate_route():
 
     if request.method == 'OPTIONS':
         response = jsonify({'status': 'ok'})
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', '*')
-        response.headers.add('Access-Control-Allow-Methods', '*')
         return response
 
     try:
@@ -256,18 +256,11 @@ def generate_route():
             })
 
         response = jsonify(result)
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept')
-        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS, GET')
         return response
 
     except Exception as e:
         logger.error(f"Error in generate_route: {str(e)}")
-        response = jsonify({'error': 'Internal server error'}), 500
-        response.headers.add('Access-Control-Allow-Origin', '*')
-        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept')
-        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS, GET')
-        return response
+        return jsonify({'error': 'Internal server error'}), 500
     
 #Тест функции по схожести запроса и категорий
 def test1():
@@ -316,17 +309,20 @@ def main():
     logger.info("Bot running on Render")
     logger.info(f"Webhook URL: {full_webhook_url}")
 
+    Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port, debug=False)).start()
     #@flask_app.route(f"/{token}", methods=["POST"])
     #def telegram_webhook():
     #    update = Update.de_json(request.get_json(force=True), app.bot)
     #    app.update_queue.put_nowait(update)
     #    return jsonify({"ok": True})
 
-    flask_app.run(host="0.0.0.0", port=port, debug=False)
+    app.run_webhook(
+        listen="0.0.0.0",
+        port=port,
+        url_path=token,
+        webhook_url=full_webhook_url
+    )
 
 
 if __name__ == "__main__":
     main()
-
-
-
