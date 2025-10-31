@@ -116,6 +116,8 @@ body {
 
 }
 
+
+
 .aboutObjHead {
     padding: 16px 0 10px 10px;
 
@@ -158,6 +160,7 @@ body {
     border-bottom: 1px dashed #fff;
     background-color: rgba(255,255,255,0.08);
     padding: 6px 5px;
+    margin-top: 10px;
 }
 
 .objDescription {
