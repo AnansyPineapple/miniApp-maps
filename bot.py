@@ -205,6 +205,23 @@ def get_candidate_places(query, ds):
     #Возвращаем DataFrame с кандидатами для маршрута.
     return candidate_places
 
+categories_time = {
+    1 : 15,
+    2: 40,
+    3: 15,
+    4: 40,
+    5: 30,
+    6: 40,
+    7: 40,
+    8: 120,
+    9: 10,
+    10: 15,
+    11: 40,
+    12: 30,
+    13: 15,
+    14: 40,
+    15: 60
+}
 
 @flask_app.route('/generate_route', methods=['POST', 'OPTIONS'])
 def generate_route():
@@ -242,19 +259,34 @@ def generate_route():
             additional_places = ds.sample(min(3 - len(selected_places), len(ds)))
             selected_places = pd.concat([selected_places, additional_places])
 
+        total_min = 0
+        for _, place in selected_places.iterrows():
+            total_min += cat_time
+            total_min += 30
+        
+        total_h = total_min//60
+        mins = total_min%60
+        totalTime = f"{total_h}.{mins:02d}"
+
         result = {
-            "startPoint": startPoint,
-            "places": []
-        }
+                "startPoint": startPoint,
+                "places": [],
+                "totalTime": totalTime
+            }
 
         for _, place in selected_places.iterrows():
-            coords = place['coordinate'].replace("POINT(", "").replace(")", "").split()
+            coords = place['coordinate'].replace("POINT (", "").replace(")", "").split()
+            
+            category_id = place['category_id']
+            cat_time = categories_time.get(category_id, 30)
+            
             result["places"].append({
                 "title": place['title'],
                 "address": place['address'],
                 "coord": [coords[0], coords[1]],
                 "description": place['description'],
-                "reason": "В вашем запросе были подходящие слова!"
+                "reason": "В вашем запросе были подходящие слова!",
+                "time": cat_time
             })
 
         response = jsonify(result)
@@ -328,5 +360,4 @@ def main():
 
 
 if __name__ == "__main__":
-
     main()
