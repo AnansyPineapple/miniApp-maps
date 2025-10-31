@@ -277,7 +277,7 @@ def generate_route():
             }
 
         for _, place in selected_places.iterrows():
-            coords = place['coordinate'].replace("POINT (", "").replace(")", "").split()
+            coords = place['coordinate'].replace("POINT(", "").replace(")", "").split()
             
             category_id = place['category_id']
             cat_time = categories_time.get(category_id, 30)
@@ -359,6 +359,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
