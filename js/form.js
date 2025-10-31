@@ -107,17 +107,36 @@ document.getElementById('routeForm').addEventListener('submit', async (e) => {
     startPoint: thirdTextarea.value
   };
   
-  const response = await fetch('https://map-bot-3rhu.onrender.com/generate_route', {
-    method: 'POST',
-    headers: {
+  try {
+    const response = await fetch('https://map-bot-3rhu.onrender.com/generate_route', {
+      method: 'POST',
+      headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json'
       },
-    body: JSON.stringify(data)
-  });
+      body: JSON.stringify(data)
+    });
 
-  const result = await response.json();
-  localStorage.setItem('routeData', JSON.stringify(result));
+    // Проверяем статус ответа
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
 
-  window.location.href = 'answer.html';
+    // Проверяем Content-Type перед парсингом
+    const contentType = response.headers.get('content-type');
+    if (!contentType || !contentType.includes('application/json')) {
+      const text = await response.text();
+      console.error('Expected JSON, got:', text.substring(0, 200));
+      throw new Error('Server returned non-JSON response');
+    }
+
+    const result = await response.json();
+    localStorage.setItem('routeData', JSON.stringify(result));
+    window.location.href = 'answer.html';
+    
+    } catch (error) {
+        console.error('Error:', error);
+        // Показываем пользователю сообщение об ошибке
+        alert('Произошла ошибка при отправке запроса. Попробуйте еще раз.');
+    }
 });
