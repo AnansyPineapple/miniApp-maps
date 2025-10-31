@@ -9,12 +9,15 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from threading import Thread
 import random
+import requests
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 flask_app = Flask(__name__)
 CORS(flask_app)
+
+AI_MODEL_URL = "https://miniapp-maps-aimodel.onrender.com"
 
 def get_bot_token():
     token = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -76,6 +79,48 @@ def define_categories(text):
     
     return list(set(found_categories))
 
+#Перегрузка функции, которая возвращает топ категории мест
+@flask_app.route('/define_categories', methods=['POST'])
+def define_categories(text, similarity_threshold=0.5, min_categories=3, max_categories=5):
+    response = requests.post(
+        f"{AI_MODEL_URL}/define_categories", 
+        json = {
+            'text': text,
+            'similarity_threshold': similarity_threshold,
+            'min_categories': min_categories,
+            'max_categories': max_categories
+        }, 
+        timeout = 30
+    )
+    return response.json()['categories']
+
+def get_candidate_places(query, ds):
+    """
+    Формирует массив всех мест, соответствующих топ-категориям запроса.
+
+    Параметры:
+        query (str) - текст запроса пользователя
+        ds (pd.DataFrame) - датасет с местами, должен содержать колонки:
+            'title', 'address', 'coordinate', 'description', 'category_id'
+
+    Возвращает:
+        pd.DataFrame - все места из топ-категорий с добавленным столбцом 'score'
+    """
+    #Вызываем define_categories(query) для определения топ категорий.
+    top_categories_with_score = define_categories(query)
+
+    top_categories_ids=[cid for cid, score in top_categories_with_score]
+
+    #Берём все места из датасета, у которых category_id входит в топ.
+    candidate_places=ds[ds['category_id'].isin(top_categories_ids)].copy()
+
+    #Добавляем столбец score, соответствующий релевантности категории запросу.
+    score_dict = {cid: score for cid, score in top_categories_with_score}
+    candidate_places['score']=candidate_places['category_id'].apply(lambda x: score_dict.get(x, 0))
+
+    #Возвращаем DataFrame с кандидатами для маршрута.
+    return candidate_places
+
 @flask_app.route('/generate_route', methods=['POST', 'OPTIONS'])
 def generate_route():
     logger.info("generate_route called")
@@ -94,7 +139,7 @@ def generate_route():
     minutes = data.get('minutes')
     startPoint = data.get('startPoint')
 
-    request_categories = define_categories(query)
+    request_categories = [cid for cid, score in define_categories(query, ds)]
 
     ds = load_dataset()
 
