@@ -19,12 +19,6 @@ logger = logging.getLogger(__name__)
 
 flask_app = Flask(__name__)
 CORS(flask_app, origins=["https://anansypineapple.github.io"])
-@flask_app.after_request
-def after_request(response):
-    response.headers.add('Access-Control-Allow-Origin', 'https://anansypineapple.github.io')
-    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
-    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
-    return response
     
 HF_API_TOKEN = os.getenv('HF_API_TOKEN')
 HF_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
@@ -305,5 +299,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
