@@ -7,10 +7,10 @@ function init() {
 
     function formatDistance(distance) {
         if (distance < 1000) {
-            return `${Math.round(distance)} м`;
+            return `${distance} м`;
         } 
         else {
-            return `${(distance / 1000).toFixed(1)} км`;
+            return `${distance / 1000} км`;
         }
     }
 
@@ -38,15 +38,15 @@ function init() {
                     if (index === 0) {
                         distance = calculateDistance(
                             [start_coords[0], start_coords[1]],
-                            [place.coord[1], place.coord[0]]
+                            [place.coord[0], place.coord[1]]
                         );
                         distanceText = formatDistance(distance);
                     } 
                     else {
                         const prevPlace = routeData.places[index - 1];
                         distance = calculateDistance(
-                            [prevPlace.coord[1], prevPlace.coord[0]],
-                            [place.coord[1], place.coord[0]]
+                            [prevPlace.coord[0], prevPlace.coord[1]],
+                            [place.coord[0], place.coord[1]]
                         );
                         distanceText = formatDistance(distance);
                     }
@@ -79,8 +79,8 @@ function init() {
                                             <line x1="7.77778" y1="16" x2="7.77778" y2="13.3333" stroke="#FF7B00" stroke-width="0.444444"></line>
                                             <line x1="8.22222" y1="13.3333" x2="8.22222" y2="16" stroke="#FF7B00" stroke-width="0.444444"></line>
                                         </svg>    
-                                        <a href="https://yandex.ru/maps/?pt=${place.coord[1]},${place.coord[0]}&z=16&l=map" target="_blank">
-                                            ${place.coord[1]}, ${place.coord[0]}
+                                        <a href="https://yandex.ru/maps/?pt=${place.coord[0]},${place.coord[1]}&z=16&l=map" target="_blank">
+                                            ${place.coord[0]}, ${place.coord[1]}
                                         </a>
                                     </div>
                                 </div>
