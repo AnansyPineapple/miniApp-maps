@@ -340,12 +340,12 @@ def main():
 
     port = int(os.environ.get('PORT', 10000))
     webhook_url = os.getenv('WEBHOOK_URL')
-
     if not webhook_url:
         raise ValueError("WEBHOOK_URL was not set!")
 
     full_webhook_url = f"{webhook_url}/{token}"
 
+    # Flask route для Telegram webhook
     @flask_app.route(f"/{token}", methods=["POST"])
     def telegram_webhook():
         try:
@@ -356,17 +356,25 @@ def main():
             logger.error(f"Error in telegram webhook: {e}")
             return jsonify({"ok": False, "error": str(e)}), 500
 
-    async def setup():
-        await app.bot.set_webhook(url=full_webhook_url)
-        logger.info("Webhook set successfully")
-
     import asyncio
-    asyncio.run(setup())
-    
-    flask_app.run(host='0.0.0.0', port=port, debug=False)
+    from threading import Thread
+
+    async def setup_and_run():
+        await app.bot.set_webhook(url=full_webhook_url)
+        logger.info(f"Webhook set to {full_webhook_url}")
+
+        Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port, debug=False, use_reloader=False), daemon=True).start()
+
+        await app.initialize()
+        await app.start()
+        await app.updater.start_polling()
+        await app.updater.idle()
+
+    asyncio.run(setup_and_run())
 
 
 if __name__ == "__main__":
     main()
+
 
 
