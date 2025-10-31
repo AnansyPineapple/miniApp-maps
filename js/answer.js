@@ -140,7 +140,7 @@ function init() {
                                 <div class="inputedTimeText">
                                     Предложенный маршрут:
                                 </div>
-                                <div class="number" id=""> 3.30 </div>
+                                <div class="number" id=""> ${routeData.totalTime} </div>
                             </div>
                         </div>
                     </div>
