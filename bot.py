@@ -17,10 +17,12 @@ import numpy as np
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+load_dotenv()
+
 HF_API_TOKEN = os.getenv('HF_API_TOKEN')
 HF_API_URL = "https://router.huggingface.co/hf-inference/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 headers = {
-    "Authorization": f"Bearer {os.environ['HF_API_TOKEN']}",
+    "Authorization": f"Bearer {HF_API_TOKEN}",
 }
 
 flask_app = Flask(__name__)
@@ -79,7 +81,7 @@ def get_embeddings(texts):
     try:
         response = requests.post(
             HF_API_URL,
-            headers=HEADERS,
+            headers=headers,
             json={"inputs": texts, "options": {"wait_for_model": True}},
             timeout=30
         )
@@ -309,19 +311,20 @@ def main():
     logger.info("Bot running on Render")
     logger.info(f"Webhook URL: {full_webhook_url}")
 
-    Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port, debug=False)).start()
+    #Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port, debug=False)).start()
     #@flask_app.route(f"/{token}", methods=["POST"])
     #def telegram_webhook():
     #    update = Update.de_json(request.get_json(force=True), app.bot)
     #    app.update_queue.put_nowait(update)
     #    return jsonify({"ok": True})
 
-    app.run_webhook(
-        listen="0.0.0.0",
-        port=port,
-        url_path=token,
-        webhook_url=full_webhook_url
-    )
+    @flask_app.route(f'/{token}', methods=['POST'])
+    def telegram_webhook():
+        update = Update.de_json(request.get_json(), app.bot)
+        app.update_queue.put_nowait(update)
+        return 'ok'
+
+    flask_app.run(host='0.0.0.0', port=port, debug=False)
 
 
 if __name__ == "__main__":
