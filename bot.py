@@ -113,7 +113,7 @@ def generate_route():
     }
 
     for _, place in selected_places.iterrows():
-        coords = place['coordinate'].replace("POINT (", "").replace(")", "").split()
+        coords = place['coordinate'].replace("POINT(", "").replace(")", "").split()
         result["places"].append({
             "title": place['title'],
             "address": place['address'],
