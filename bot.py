@@ -9,7 +9,8 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 from threading import Thread
 import random
-import requests
+from sentence_transformers import SentenceTransformer, util
+import torch
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -17,7 +18,6 @@ logger = logging.getLogger(__name__)
 flask_app = Flask(__name__)
 CORS(flask_app)
 
-AI_MODEL_URL = "https://miniapp-maps-aimodel.onrender.com"
 
 def get_bot_token():
     token = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -28,6 +28,7 @@ def get_bot_token():
         raise ValueError("TELEGRAM_BOT_TOKEN was not found!")
     return token
 
+
 def load_dataset():
     try:
         ds = pd.read_excel('dataset.xlsx')
@@ -36,35 +37,40 @@ def load_dataset():
         print(f"Ошибка загрузки датасета - {e}")
         return None
 
+
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [InlineKeyboardButton("Открыть приложение", web_app = {"url" : "https://anansypineapple.github.io/miniApp-maps/"})]
+        [InlineKeyboardButton("Открыть приложение", web_app={"url": "https://anansypineapple.github.io/miniApp-maps/"})]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("Привет, друг! Нажми кнопку ниже чтобы запустить приложение!", reply_markup = reply_markup)
+    await update.message.reply_text("Привет, друг! Нажми кнопку ниже чтобы запустить приложение!",
+                                    reply_markup=reply_markup)
+
 
 async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     keyboard = [
-        [InlineKeyboardButton("Открыть приложение", web_app = {"url" : "https://anansypineapple.github.io/miniApp-maps/"})]
+        [InlineKeyboardButton("Открыть приложение", web_app={"url": "https://anansypineapple.github.io/miniApp-maps/"})]
     ]
     reply_markup = InlineKeyboardMarkup(keyboard)
-    await update.message.reply_text("Чтобы начать работу необходимо запустить приложение!", reply_markup = reply_markup)
+    await update.message.reply_text("Чтобы начать работу необходимо запустить приложение!", reply_markup=reply_markup)
+
 
 categories = {
-    1: ["памятник","скульптура","монумент","статуя"],
-    2: ["парк","сквер","зона","отдых","прогулка","гулять"],
-    3: ["макет","объект","здание"],
-    4: ["набережная","берег","река","Волга","Ока"],
-    5: ["архитектура","история","постройка"],
-    6: ["культура","досуг","тц","развлечения"],
-    7: ["музей","выставка","галерея","пространство","искусство","художник"],
-    8: ["театр","филармония"],
-    9: ["города","инфраструктура"],
-    10: ["монумент","искусство"],
-    11: ["ресторан","кафе","еда","голоден","жрать"],
-    12: ["кофе","кофейня","выпить"],
-    13: ["кондитерская","пекарня","булочки","торт","пирожные"]
+    1: ["памятник", "скульптура", "монумент", "статуя"],
+    2: ["парк", "сквер", "зона", "отдых", "прогулка", "гулять"],
+    3: ["макет", "объект", "здание"],
+    4: ["набережная", "берег", "река", "Волга", "Ока"],
+    5: ["архитектура", "история", "постройка"],
+    6: ["культура", "досуг", "тц", "развлечения"],
+    7: ["музей", "выставка", "галерея", "пространство", "искусство", "художник"],
+    8: ["театр", "филармония"],
+    9: ["города", "инфраструктура"],
+    10: ["монумент", "искусство"],
+    11: ["ресторан", "кафе", "еда", "голоден", "жрать"],
+    12: ["кофе", "кофейня", "выпить"],
+    13: ["кондитерская", "пекарня", "булочки", "торт", "пирожные"]
 }
+
 
 def define_categories(text):
     text = text.lower()
@@ -76,23 +82,80 @@ def define_categories(text):
             if word in text:
                 found_categories.append(key)
                 break
-    
+
     return list(set(found_categories))
 
+#Чтобы в консоль не было информировании о запуске модели
+logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
+
+#Сама модель для работы с запросом
+model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+model = model.half()
+
+#Наши категории из таблицы
+category_names = [
+    "Памятники и скульптуры",
+    "Парки, скверы и зоны отдыха",
+    "Макеты архитектурных объектов",
+    "Набережные",
+    "Архитектура и исторические здания",
+    "Культурно-досуговые центры и библиотеки",
+    "Музеи и выставочные пространства",
+    "Театры и филармонии",
+    "Инфраструктура",
+    "Монументально-декоративное искусство",
+    "Рестораны и кафе",
+    "Кофейни",
+    "Кондитерские и пекарни",
+    "Торговые центры",
+    "Места для развлечения"
+]
+
+#Перевод для дальнейшего сравнения
+category_embeddings = model.encode(category_names, convert_to_tensor=True, show_progress_bar=False)
+
 #Перегрузка функции, которая возвращает топ категории мест
-@flask_app.route('/define_categories', methods=['POST'])
 def define_categories(text, similarity_threshold=0.5, min_categories=3, max_categories=5):
-    response = requests.post(
-        f"{AI_MODEL_URL}/define_categories", 
-        json = {
-            'text': text,
-            'similarity_threshold': similarity_threshold,
-            'min_categories': min_categories,
-            'max_categories': max_categories
-        }, 
-        timeout = 30
-    )
-    return response.json()['categories']
+    """
+    Определяет топ категорий для запроса пользователя с использованием sentence-transformers.
+
+    Параметры:
+        text (str) - текст запроса пользователя
+        similarity_threshold (float) - минимальное значение косинусного сходства для включения категории
+        min_categories (int) - минимальное количество категорий в топе
+        max_categories (int) - максимальное количество категорий в топе
+
+    Возвращает:
+        list of tuples: [(category_id, score), ...] — топ категорий с их схожестью
+    """
+
+#Кодируем запрос в вектор с помощью модели sentence-transformers.
+    query_emb = model.encode(text, convert_to_tensor=True, show_progress_bar=False)
+#Считаем косинусное сходство запроса с векторами категорий.
+    similarities = util.cos_sim(query_emb, category_embeddings)[0]
+
+#Сортируем категории по схожести.
+    sorted_indices = torch.argsort(similarities, descending=True).tolist()
+    sorted_scores = similarities[sorted_indices].tolist()
+
+    found=[]
+
+#Добавляем в результат только те, у которых сходство ≥ similarity_threshold.
+    for idx, score in zip(sorted_indices, sorted_scores):
+        if score >= similarity_threshold:
+            found.append((idx+1, score))
+        if len(found) >= max_categories:
+            break
+#Если найдено меньше min_categories, добавляем следующие по схожести, чтобы гарантировать минимум.
+    if len(found) < min_categories:
+        for idx, score in zip(sorted_indices, sorted_scores):
+            if (idx + 1, score) not in found:
+                found.append((idx + 1, score))
+            if len(found) >= min_categories:
+                break
+
+#Возвращаем список кортежей (category_id, score).
+    return found[:max_categories]
 
 def get_candidate_places(query, ds):
     """
@@ -121,17 +184,18 @@ def get_candidate_places(query, ds):
     #Возвращаем DataFrame с кандидатами для маршрута.
     return candidate_places
 
+
 @flask_app.route('/generate_route', methods=['POST', 'OPTIONS'])
 def generate_route():
     logger.info("generate_route called")
-    
+
     if request.method == 'OPTIONS':
         response = jsonify({'status': 'ok'})
         response.headers.add('Access-Control-Allow-Origin', '*')
         response.headers.add('Access-Control-Allow-Headers', '*')
         response.headers.add('Access-Control-Allow-Methods', '*')
         return response
-    
+
     data = request.json
 
     query = data.get('query')
@@ -139,13 +203,13 @@ def generate_route():
     minutes = data.get('minutes')
     startPoint = data.get('startPoint')
 
-    request_categories = [cid for cid, score in define_categories(query, ds)]
+    request_categories = define_categories(query)
 
     ds = load_dataset()
 
     list_of_places = ds[ds['category_id'].isin(request_categories)]
 
-    #Пока что логика - брать первые 3-5 мест или если их менее 3 то дополняем случайными 
+    # Пока что логика - брать первые 3-5 мест или если их менее 3 то дополняем случайными
     selected_places = list_of_places.head(min(5, len(list_of_places)))
     if len(selected_places) < 3:
         additional_places = ds.sample(3 - len(selected_places))
@@ -153,12 +217,11 @@ def generate_route():
 
     result = {
         "startPoint": startPoint,
-        "places": [],
-        "time": f"{hours}.{minutes}"
+        "places": []
     }
 
     for _, place in selected_places.iterrows():
-        coords = place['coordinate'].replace("POINT(", "").replace(")", "").split()
+        coords = place['coordinate'].replace("POINT (", "").replace(")", "").split()
         result["places"].append({
             "title": place['title'],
             "address": place['address'],
@@ -166,10 +229,39 @@ def generate_route():
             "description": place['description'],
             "reason": "В вашем запросе были подходящие слова!"
         })
-    
+
     response = jsonify(result)
     response.headers.add('Access-Control-Allow-Origin', '*')
     return response
+
+#Тест функции по схожести запроса и категорий
+def test1():
+    test_queries = [
+        "Хочу прогуляться по парку и посмотреть памятники",
+        "Ищу хороший ресторан с кофе и десертами",
+        "Посетить музей и выставку искусства",
+        "Прогуляться по набережной Волги",
+        "Что-то историческое и архитектурное"
+    ]
+    for query in test_queries:
+        categories_found = define_categories(query)
+        print(f"Запрос: {query}")
+        for cat_id, score in categories_found:
+            label = category_names[cat_id - 1]
+            if score is not None:
+                print(f"  Категория {cat_id}: {label}, схожесть = {score:.3f}")
+            else:
+                print(f"  Категория {cat_id}: {label} (fallback)")
+        print("-" * 40)
+
+#Тест на составление таблицы кандидатов
+def test2():
+    ds = load_dataset()
+    query="Хочу прогуляться по парку и посмотреть памятники"
+    candidates = get_candidate_places(query, ds)
+    print("Все кандидаты для маршрута:")
+    print(candidates[['title', 'category_id', 'score']].sort_values(by='score', ascending=False))
+
 
 def main():
     token = get_bot_token()
@@ -177,28 +269,31 @@ def main():
 
     app.add_handler(CommandHandler("start", start_command))
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
-    
+
     port = int(os.environ.get('PORT', 10000))
-    #webhook_url = os.getenv('WEBHOOK_URL')
-        
-    #if not webhook_url:
+    # webhook_url = os.getenv('WEBHOOK_URL')
+
+    # if not webhook_url:
     #    raise ValueError("WEBHOOK_URL was not set!")
-        
+
     #    full_webhook_url = f"{webhook_url}/{token}"
 
     logger.info("Bot is running from Render.com")
 
     Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port, debug=False)).start()
 
-        #app.run_webhook(
-        #    listen="0.0.0.0", 
-        #    port=10000, 
-        #    webhook_url=full_webhook_url,
-        #    url_path=token
-        #   )
-        
+    # app.run_webhook(
+    #    listen="0.0.0.0",
+    #    port=10000,
+    #    webhook_url=full_webhook_url,
+    #    url_path=token
+    #   )
+
     app.run_polling()
-    #logger.info("Bot is running locally")
+    # logger.info("Bot is running locally")
+
 
 if __name__ == "__main__":
-    main()
+    test1()
+#    test2()
+#    main()
