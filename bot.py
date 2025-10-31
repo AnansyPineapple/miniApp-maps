@@ -10,7 +10,9 @@ from flask_cors import CORS
 from threading import Thread
 import random
 from sentence_transformers import SentenceTransformer, util
+import requests
 import torch
+import numpy as np
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -18,6 +20,9 @@ logger = logging.getLogger(__name__)
 flask_app = Flask(__name__)
 CORS(flask_app)
 
+HF_API_TOKEN = "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"
+HF_API_URL = "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
 
 def get_bot_token():
     token = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -54,65 +59,56 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
     reply_markup = InlineKeyboardMarkup(keyboard)
     await update.message.reply_text("Чтобы начать работу необходимо запустить приложение!", reply_markup=reply_markup)
 
-
-categories = {
-    1: ["памятник", "скульптура", "монумент", "статуя"],
-    2: ["парк", "сквер", "зона", "отдых", "прогулка", "гулять"],
-    3: ["макет", "объект", "здание"],
-    4: ["набережная", "берег", "река", "Волга", "Ока"],
-    5: ["архитектура", "история", "постройка"],
-    6: ["культура", "досуг", "тц", "развлечения"],
-    7: ["музей", "выставка", "галерея", "пространство", "искусство", "художник"],
-    8: ["театр", "филармония"],
-    9: ["города", "инфраструктура"],
-    10: ["монумент", "искусство"],
-    11: ["ресторан", "кафе", "еда", "голоден", "жрать"],
-    12: ["кофе", "кофейня", "выпить"],
-    13: ["кондитерская", "пекарня", "булочки", "торт", "пирожные"]
-}
-
-
-def define_categories(text):
-    text = text.lower()
-
-    found_categories = []
-
-    for key, value in categories.items():
-        for word in value:
-            if word in text:
-                found_categories.append(key)
-                break
-
-    return list(set(found_categories))
-
 #Чтобы в консоль не было информировании о запуске модели
-logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
+#logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
 
 #Сама модель для работы с запросом
-model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
-model = model.half()
+#model = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
+#model = model.half()
 
-#Наши категории из таблицы
-category_names = [
-    "Памятники и скульптуры",
-    "Парки, скверы и зоны отдыха",
-    "Макеты архитектурных объектов",
-    "Набережные",
-    "Архитектура и исторические здания",
-    "Культурно-досуговые центры и библиотеки",
-    "Музеи и выставочные пространства",
-    "Театры и филармонии",
-    "Инфраструктура",
-    "Монументально-декоративное искусство",
-    "Рестораны и кафе",
-    "Кофейни",
-    "Кондитерские и пекарни",
-    "Торговые центры",
-    "Места для развлечения"
-]
+def get_embeddings(texts):
+    if isinstance(texts, str):
+        texts = [texts]
+    
+    response = requests.post(
+        HF_API_URL, 
+        headers=headers, 
+        json={"inputs": texts, "wait_for_model": True}
+    )
+    
+    if response.status_code == 200:
+        return response.json()
+    else:
+        print(f"Ошибка HF API: {response.status_code} - {response.text}")
+        return None
+
+def load_category_embeddings():
+    category_names = [
+        "Памятники и скульптуры",
+        "Парки, скверы и зоны отдыха",
+        "Макеты архитектурных объектов",
+        "Набережные",
+        "Архитектура и исторические здания",
+        "Культурно-досуговые центры и библиотеки",
+        "Музеи и выставочные пространства",
+        "Театры и филармонии",
+        "Инфраструктура",
+        "Монументально-декоративное искусство",
+        "Рестораны и кафе",
+        "Кофейни",
+        "Кондитерские и пекарни",
+        "Торговые центры",
+        "Места для развлечения"
+    ]
+    
+    embeddings = get_embeddings(category_names)
+    if embeddings:
+        return torch.tensor(embeddings)
+
+category_embeddings = load_category_embeddings()
 
 #Перевод для дальнейшего сравнения
-category_embeddings = model.encode(category_names, convert_to_tensor=True, show_progress_bar=False)
+#category_embeddings = model.encode(category_names, convert_to_tensor=True, show_progress_bar=False)
 
 #Перегрузка функции, которая возвращает топ категории мест
 def define_categories(text, similarity_threshold=0.5, min_categories=3, max_categories=5):
@@ -130,7 +126,8 @@ def define_categories(text, similarity_threshold=0.5, min_categories=3, max_cate
     """
 
 #Кодируем запрос в вектор с помощью модели sentence-transformers.
-    query_emb = model.encode(text, convert_to_tensor=True, show_progress_bar=False)
+    query_emb = get_embeddings(text)
+    query_emb = torch.tensor(query_emb)
 #Считаем косинусное сходство запроса с векторами категорий.
     similarities = util.cos_sim(query_emb, category_embeddings)[0]
 
@@ -297,3 +294,4 @@ if __name__ == "__main__":
     test1()
 #    test2()
 #    main()
+
