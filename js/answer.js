@@ -7,10 +7,10 @@ function init() {
 
     function formatDistance(distance) {
         if (distance < 1000) {
-            return `${distance} м`;
+            return `${Math.round(distance)} м`;
         } 
         else {
-            return `${distance / 1000} км`;
+            return `${(distance / 1000).toFixed(2)} км`;
         }
     }
 
