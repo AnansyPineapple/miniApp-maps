@@ -9,7 +9,6 @@ const routeData = JSON.parse(localStorage.getItem('routeData'));
 
 if (routeData && routeData.places && Array.isArray(routeData.places)) {
   const container = document.querySelector('.ansContainer');
-  container.innerHTML = '<div class="mapBlock"><div class="mainMap" id="map"></div></div>';
 
   routeData.places.forEach((place, index) => {
     const html = `
@@ -62,7 +61,113 @@ if (routeData && routeData.places && Array.isArray(routeData.places)) {
       </div>
     `;
     container.insertAdjacentHTML('beforeend', html);
+
+ 
+
   });
+
+     const finalReport = `
+    <div class="finalReport aboutObject">
+    
+        <div class="reportTitle">   
+            Информация о маршруте:
+        </div>
+        <div class="reportCont">
+            <div class="routeInfo">
+                    <div class="InfoAboutObjRoute">
+                        <div class="objName">
+                            Фуникулер:
+                        </div>
+                        <div class="TimeToObj">
+                            <div class="timeToObjText">
+                                Расстояние до объекта от точки старта:
+                            </div>
+                            <div class="number" id=""> 3km </div>
+                        </div>
+                        <div class="TimeToObj">
+                            <div class="timeToObjText">
+                                Время в пути:
+                            </div>
+                            <div class="number" id=""> 1ч. 20мин. </div>
+                        </div>
+                        <div class="TimeToObj">
+                            <div class="timeToObjText">
+                                Время на объекте:
+                            </div>
+                            <div class="number" id=""> 1ч. 20мин. </div>
+                        </div>
+                    </div>
+                    <div class="InfoAboutObjRoute">
+                        <div class="objName">
+                            Фуникулер:
+                        </div>
+                        <div class="TimeToObj">
+                            <div class="timeToObjText">
+                                Расстояние до следующего объекта:
+                            </div>
+                            <div class="number" id=""> 3km </div>
+                        </div>
+                        <div class="TimeToObj">
+                            <div class="timeToObjText">
+                                Время в пути:
+                            </div>
+                            <div class="number" id=""> 1ч. 20мин. </div>
+                        </div>
+                        <div class="TimeToObj">
+                            <div class="timeToObjText">
+                                Время на объекте:
+                            </div>
+                            <div class="number" id=""> 1ч. 20мин. </div>
+                        </div>
+                    </div>
+                    <div class="InfoAboutObjRoute">
+                        <div class="objName">
+                            Фуникулер:
+                        </div>
+                        <div class="TimeToObj">
+                            <div class="timeToObjText">
+                                Расстояние до следующего объекта:
+                            </div>
+                            <div class="number" id=""> 3km </div>
+                        </div>
+                        <div class="TimeToObj">
+                            <div class="timeToObjText">
+                                Время в пути:
+                            </div>
+                            <div class="number" id=""> 1ч. 20мин. </div>
+                        </div>
+                        <div class="TimeToObj">
+                            <div class="timeToObjText">
+                                Время на объекте:
+                            </div>
+                            <div class="number" id=""> 1ч. 20мин. </div>
+                        </div>
+                    </div>
+                 </div>
+            <div class="footerTitle">
+                 Итого:
+            </div>
+        
+            <div class="inputedTime">
+                <div class="inputedTimeText">
+                    Введенное время:
+                </div>
+                <div class="number" id=""> 3.30 </div>
+            </div>
+            <div class="realTime">
+                <div class="inputedTimeText">
+                    Предложенный маршрут:
+                </div>
+                <div class="number" id=""> 3.30 </div>
+            </div>
+        </div>
+    </div>
+
+   
+                    `;
+
+    
+    container.insertAdjacentHTML('beforeend', finalReport);
 }
 
 const modalOverlay = document.getElementById('modalOverlay');

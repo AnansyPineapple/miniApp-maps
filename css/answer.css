@@ -97,6 +97,7 @@ body {
 }
 .mainMap {
     height: 300px;
+    width: 100%;
     border: 2px solid #fff;
     border-radius: 5px;
     margin-top: 20px;
@@ -110,7 +111,7 @@ body {
     width: 100%;
     border: 1.5px solid #fff;
     border-radius: 5px;
-    margin-bottom: 10px;
+    margin-bottom: 13px;
 }
 
 .aboutObjHead {
@@ -172,6 +173,57 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     cursor: pointer;
+}
+
+
+
+.finalReport {
+    padding: 16px 10px;
+}
+
+.reportTitle {
+    font-size: 20px;
+    font-weight: 400;
+    margin-bottom: 8px;
+}
+
+.reportCont {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+
+}
+
+.inputedTime, .realTime {
+    font-size: 16px;
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+}
+
+.number{
+    text-decoration: underline;
+}
+
+
+.InfoAboutObjRoute {
+    margin-bottom: 10px;
+}
+.TimeToObj {
+    display: flex;
+    flex-direction: row;
+    gap: 6px;
+    margin-bottom: 6px;
+}
+
+.objName {
+    font-size: 18px;
+    text-decoration: underline;
+    margin-bottom: 2px;
+}
+
+.footerTitle {
+    font-size: 18px;
 }
 
 

@@ -1,0 +1,37 @@
+.suggestion-item {
+    color: #fff;
+    padding: 5px;
+    cursor: pointer;
+}
+
+.suggestion-item:hover {
+    background: rgba(255,255,255,0.12);
+}
+
+
+.ymaps-2-1-79-search__suggest {
+    position: absolute;
+    z-index: 100;
+    max-height: 150px;
+    overflow-y: auto;
+    background: rgba(15, 15, 15, 0.85); 
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 14px;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 8px 24px rgba(255,123,0,0.18);
+}
+
+.ymaps-2-1-79-suggest-item {
+    color:#fff;
+    display: block;
+}
+
+.ymaps-2-1-79-suggest-item:focus {
+    color:#000;
+    background: rgba(0, 0, 0, 1) !important; 
+}
+.ymaps-2-1-79-suggest-item:active {
+    color:#000;
+    background: rgb(0, 0, 0, 1) !important; 
+}
+
