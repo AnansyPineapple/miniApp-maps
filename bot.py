@@ -18,11 +18,11 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 flask_app = Flask(__name__)
-CORS(flask_app)
+CORS(flask_app, origins=["https://anansypineapple.github.io"])
 
 HF_API_TOKEN = os.getenv('HF_API_TOKEN')
-HF_API_URL = "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
+HF_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+headers = {"Authorization": f"Bearer {HF_API_TOKEN}"} if HF_API_TOKEN else {}
 
 def get_bot_token():
     token = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -67,19 +67,28 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 #model = model.half()
 
 def get_embeddings(texts):
+    if not HF_API_TOKEN:
+        print("Ошибка: HF_API_TOKEN не установлен")
+        return None
+        
     if isinstance(texts, str):
         texts = [texts]
     
-    response = requests.post(
-        HF_API_URL, 
-        headers=headers, 
-        json={"inputs": texts, "wait_for_model": True}
-    )
-    
-    if response.status_code == 200:
-        return response.json()
-    else:
-        print(f"Ошибка HF API: {response.status_code} - {response.text}")
+    try:
+        response = requests.post(
+            HF_API_URL, 
+            headers=headers, 
+            json={"inputs": texts, "options": {"wait_for_model": True}},
+            timeout=30
+        )
+        
+        if response.status_code == 200:
+            return response.json()
+        else:
+            print(f"Ошибка HF API: {response.status_code} - {response.text}")
+            return None
+    except Exception as e:
+        print(f"Исключение при запросе к HF API: {e}")
         return None
 
 def load_category_embeddings():
@@ -291,8 +300,4 @@ def main():
 
 
 if __name__ == "__main__":
-    test1()
-#    test2()
-#    main()
-
-
+    main()
