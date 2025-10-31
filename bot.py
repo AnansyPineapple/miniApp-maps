@@ -326,6 +326,10 @@ def test2():
     print("Все кандидаты для маршрута:")
     print(candidates[['title', 'category_id', 'score']].sort_values(by='score', ascending=False))
 
+def run_flask():
+    port = int(os.environ.get('PORT', 10000))
+    logger.info(f"Starting Flask server on port {port}")
+    flask_app.run(host='0.0.0.0', port=port, debug=False, use_reloader=False)
 
 def main():
     token = get_bot_token()
@@ -342,21 +346,27 @@ def main():
 
     full_webhook_url = f"{webhook_url}/{token}"
 
-    logger.info("Bot running on Render")
-    logger.info(f"Webhook URL: {full_webhook_url}")
-
-    async def set_webhook():
-        await app.bot.set_webhook(url=full_webhook_url)
-        
     @flask_app.route(f"/{token}", methods=["POST"])
     def telegram_webhook():
-        update = Update.de_json(request.get_json(force=True), app.bot)
-        app.update_queue.put_nowait(update)
-        return jsonify({"ok": True})
+        try:
+            update = Update.de_json(request.get_json(force=True), app.bot)
+            app.update_queue.put_nowait(update)
+            return jsonify({"ok": True})
+        except Exception as e:
+            logger.error(f"Error in telegram webhook: {e}")
+            return jsonify({"ok": False, "error": str(e)}), 500
 
+    async def setup():
+        await app.bot.set_webhook(url=full_webhook_url)
+        logger.info("Webhook set successfully")
+
+    import asyncio
+    asyncio.run(setup())
+    
     flask_app.run(host='0.0.0.0', port=port, debug=False)
 
 
 if __name__ == "__main__":
     main()
+
 
