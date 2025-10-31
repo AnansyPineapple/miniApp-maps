@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 flask_app = Flask(__name__)
 CORS(flask_app)
 
-HF_API_TOKEN = "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"
+HF_API_TOKEN = os.getenv('HF_API_TOKEN')
 HF_API_URL = "https://api-inference.huggingface.co/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 headers = {"Authorization": f"Bearer {HF_API_TOKEN}"}
 
@@ -294,4 +294,5 @@ if __name__ == "__main__":
     test1()
 #    test2()
 #    main()
+
 
