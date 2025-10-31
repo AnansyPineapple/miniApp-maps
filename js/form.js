@@ -109,7 +109,10 @@ document.getElementById('routeForm').addEventListener('submit', async (e) => {
   
   const response = await fetch('https://map-bot-3rhu.onrender.com/generate_route', {
     method: 'POST',
-    headers: {'Content-Type': 'application/json'},
+    headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      },
     body: JSON.stringify(data)
   });
 

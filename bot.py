@@ -18,11 +18,19 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 flask_app = Flask(__name__)
-CORS(flask_app, origins=["https://anansypineapple.github.io"])
+CORS(flask_app, resources={
+    r"/generate_route": {
+        "origins": ["https://anansypineapple.github.io", "http://localhost:3000"],
+        "methods": ["POST", "OPTIONS"],
+        "allow_headers": ["Content-Type"]
+    }
+})
     
 HF_API_TOKEN = os.getenv('HF_API_TOKEN')
-HF_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
-headers = {"Authorization": f"Bearer {HF_API_TOKEN}"} if HF_API_TOKEN else {}
+HF_API_URL = "https://router.huggingface.co/hf-inference/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+headers = {
+    "Authorization": f"Bearer {os.environ['HF_API_TOKEN']}",
+}
 
 def get_bot_token():
     token = os.getenv('TELEGRAM_BOT_TOKEN')
@@ -75,6 +83,8 @@ def get_embeddings(texts):
         texts = [texts]
     
     try:
+        HF_API_URL = "https://router.huggingface.co/hf-inference/models/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
+        
         response = requests.post(
             HF_API_URL, 
             headers=headers, 
@@ -90,7 +100,7 @@ def get_embeddings(texts):
     except Exception as e:
         print(f"Исключение при запросе к HF API: {e}")
         return None
-
+    
 def load_category_embeddings():
     category_names = [
         "Памятники и скульптуры",
@@ -202,45 +212,63 @@ def generate_route():
         response.headers.add('Access-Control-Allow-Methods', '*')
         return response
 
-    data = request.json
+    try:
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'No JSON data provided'}), 400
 
-    query = data.get('query')
-    hours = data.get('hours')
-    minutes = data.get('minutes')
-    startPoint = data.get('startPoint')
+        query = data.get('query')
+        hours = data.get('hours')
+        minutes = data.get('minutes')
+        startPoint = data.get('startPoint')
 
-    request_categories = define_categories(query)
+        if not query:
+            return jsonify({'error': 'Query is required'}), 400
 
-    ds = load_dataset()
+        request_categories = define_categories(query)
 
-    top_categories_ids = [cid for cid, score in request_categories]
-    list_of_places = ds[ds['category_id'].isin(top_categories_ids)]
+        ds = load_dataset()
+        if ds is None:
+            return jsonify({'error': 'Failed to load dataset'}), 500
 
-    # Пока что логика - брать первые 3-5 мест или если их менее 3 то дополняем случайными
-    selected_places = list_of_places.head(min(5, len(list_of_places)))
-    if len(selected_places) < 3:
-        additional_places = ds.sample(3 - len(selected_places))
-        selected_places = pd.concat([selected_places, additional_places])
+        top_categories_ids = [cid for cid, score in request_categories]
+        list_of_places = ds[ds['category_id'].isin(top_categories_ids)]
 
-    result = {
-        "startPoint": startPoint,
-        "places": []
-    }
+        # Пока что логика - брать первые 3-5 мест или если их менее 3 то дополняем случайными
+        selected_places = list_of_places.head(min(5, len(list_of_places)))
+        if len(selected_places) < 3:
+            additional_places = ds.sample(min(3 - len(selected_places), len(ds)))
+            selected_places = pd.concat([selected_places, additional_places])
 
-    for _, place in selected_places.iterrows():
-        coords = place['coordinate'].replace("POINT (", "").replace(")", "").split()
-        result["places"].append({
-            "title": place['title'],
-            "address": place['address'],
-            "coord": [coords[0], coords[1]],
-            "description": place['description'],
-            "reason": "В вашем запросе были подходящие слова!"
-        })
+        result = {
+            "startPoint": startPoint,
+            "places": []
+        }
 
-    response = jsonify(result)
-    response.headers.add('Access-Control-Allow-Origin', '*')
-    return response
+        for _, place in selected_places.iterrows():
+            coords = place['coordinate'].replace("POINT (", "").replace(")", "").split()
+            result["places"].append({
+                "title": place['title'],
+                "address": place['address'],
+                "coord": [coords[0], coords[1]],
+                "description": place['description'],
+                "reason": "В вашем запросе были подходящие слова!"
+            })
 
+        response = jsonify(result)
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept')
+        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS, GET')
+        return response
+
+    except Exception as e:
+        logger.error(f"Error in generate_route: {str(e)}")
+        response = jsonify({'error': 'Internal server error'}), 500
+        response.headers.add('Access-Control-Allow-Origin', '*')
+        response.headers.add('Access-Control-Allow-Headers', 'Content-Type, Authorization, Accept')
+        response.headers.add('Access-Control-Allow-Methods', 'POST, OPTIONS, GET')
+        return response
+    
 #Тест функции по схожести запроса и категорий
 def test1():
     test_queries = [
@@ -288,11 +316,11 @@ def main():
     logger.info("Bot running on Render")
     logger.info(f"Webhook URL: {full_webhook_url}")
 
-    @flask_app.route(f"/{token}", methods=["POST"])
-    def telegram_webhook():
-        update = Update.de_json(request.get_json(force=True), app.bot)
-        app.update_queue.put_nowait(update)
-        return jsonify({"ok": True})
+    #@flask_app.route(f"/{token}", methods=["POST"])
+    #def telegram_webhook():
+    #    update = Update.de_json(request.get_json(force=True), app.bot)
+    #    app.update_queue.put_nowait(update)
+    #    return jsonify({"ok": True})
 
     flask_app.run(host="0.0.0.0", port=port, debug=False)
 
