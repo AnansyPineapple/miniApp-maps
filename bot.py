@@ -19,7 +19,13 @@ logger = logging.getLogger(__name__)
 
 flask_app = Flask(__name__)
 CORS(flask_app, origins=["https://anansypineapple.github.io"])
-
+@flask_app.after_request
+def after_request(response):
+    response.headers.add('Access-Control-Allow-Origin', 'https://anansypineapple.github.io')
+    response.headers.add('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    response.headers.add('Access-Control-Allow-Methods', 'GET,PUT,POST,DELETE,OPTIONS')
+    return response
+    
 HF_API_TOKEN = os.getenv('HF_API_TOKEN')
 HF_API_URL = "https://api-inference.huggingface.co/pipeline/feature-extraction/sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2"
 headers = {"Authorization": f"Bearer {HF_API_TOKEN}"} if HF_API_TOKEN else {}
@@ -278,28 +284,26 @@ def main():
     app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, handle_message))
 
     port = int(os.environ.get('PORT', 10000))
-    # webhook_url = os.getenv('WEBHOOK_URL')
+    webhook_url = os.getenv('WEBHOOK_URL')
 
-    # if not webhook_url:
-    #    raise ValueError("WEBHOOK_URL was not set!")
+    if not webhook_url:
+        raise ValueError("WEBHOOK_URL was not set!")
 
-    #    full_webhook_url = f"{webhook_url}/{token}"
+    full_webhook_url = f"{webhook_url}/{token}"
 
-    logger.info("Bot is running from Render.com")
+    logger.info("Bot running on Render")
+    logger.info(f"Webhook URL: {full_webhook_url}")
 
-    Thread(target=lambda: flask_app.run(host="0.0.0.0", port=port, debug=False)).start()
+    @flask_app.route(f"/{token}", methods=["POST"])
+    def telegram_webhook():
+        update = Update.de_json(request.get_json(force=True), app.bot)
+        app.update_queue.put_nowait(update)
+        return jsonify({"ok": True})
 
-    # app.run_webhook(
-    #    listen="0.0.0.0",
-    #    port=10000,
-    #    webhook_url=full_webhook_url,
-    #    url_path=token
-    #   )
-
-    app.run_polling()
-    # logger.info("Bot is running locally")
+    flask_app.run(host="0.0.0.0", port=port, debug=False)
 
 
 if __name__ == "__main__":
     main()
+
 
