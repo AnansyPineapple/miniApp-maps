@@ -692,7 +692,7 @@ def generate_route():
                         "reason": place['reason'],
                         "time": place['duration']
                     })
-                logger.info(f"Place info: {original_place['title']}, at {original_place['address']}, desc. - {original_place.get('description', '')}, {place['reason']}, {place['duration']})
+                logger.info(f"Place info: {original_place['title']}, at {original_place['address']}, desc. - {original_place.get('description', '')}, {place['reason']}, {place['duration']}")
 
         # ИСПРАВЛЕНИЕ: Человеко-читаемый формат времени
         total_h = route['total_duration'] // 60
@@ -762,6 +762,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
