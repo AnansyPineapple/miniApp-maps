@@ -109,12 +109,12 @@ function init() {
 
                             <div class="objDescriptionWrapper">
                                 <div class="objDescription truncatedText">
-                                    ${place.description}
+                                    ${original_place.description}
                                 </div>
                             </div>
                             <div class="ObjFooter" 
                             data-text="
-                            ${place.reason}
+                            ${original_place.reason}
                             "
                             >
                             Почему мне предложили этот объект?

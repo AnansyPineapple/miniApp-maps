@@ -42,19 +42,20 @@ class RouteExplainer:
         self._cached_prompts = self._precompile_prompts()
         self._category_mapping = {
             '1': 'Памятники и скульптуры',
-            '2': 'Парки и природные объекты', 
-            '3': 'Тактильные макеты',
-            '4': 'набережные',
-            '5': 'архитектура и исторические здания',
-            '6': 'общественные центры',
-            '7': 'музеи',
-            '8': 'театры и филармонии',
-            '10': 'монументальное искусство',
-            '11': 'рестораны и кафе',
-            '12': 'кофейни', 
-            '13': 'кондитерские и пекарни',
-            '14': 'торговые центры',
-            '15': 'места для развлечений'
+            '2': 'Парки, скверы и зоны отдыха', 
+            '3': 'Макеты архитектурных объектов',
+            '4': 'Набережные',
+            '5': 'Архитектура и исторические здания',
+            '6': 'Культурно-досуговые центры и библиотеки',
+            '7': 'Музеи и выставочные пространства',
+            '8': 'Театры и филармонии',
+            '9': 'Инфраструктура',
+            '10': 'Монументально-декоративное искусство',
+            '11': 'Рестораны и кафе',
+            '12': 'Кофейни', 
+            '13': 'Кондитерские и пекарни',
+            '14': 'Торговые центры',
+            '15': 'Места для развлечения'
         }
         
         self._fallback_reasons = {
@@ -66,6 +67,7 @@ class RouteExplainer:
             '6': "добавлен как общественное пространство для мероприятий и отдыха",
             '7': "выбран потому что это музей с интересными экспозициями",
             '8': "включен как культурное учреждение для досуга и развлечений",
+            '9': "добавлен как важный объект городской инфраструктуры",
             '10': "добавлен как произведение монументального искусства",
             '11': "выбран как заведение для полноценного питания и отдыха",
             '12': "включен как уютное место для кофе-брейка и встреч",
@@ -302,12 +304,8 @@ class RouteExplainer:
             
             result['places'] = valid_places
             
-            # ИСПРАВЛЕНИЕ: Ограничиваем максимальное время маршрута
             if 'total_duration' not in result:
                 result['total_duration'] = sum(p.get('duration', 30) for p in valid_places)
-            
-            # Ограничиваем максимальное время 24 часами (1440 минут)
-            result['total_duration'] = min(result['total_duration'], 1440)
             
             if 'timeline' not in result:
                 result['timeline'] = f"Маршрут из {len(valid_places)} мест"
@@ -333,11 +331,6 @@ class RouteExplainer:
             return self._get_minimal_fallback_route()
         
         selected_places = places[:4]
-        
-        # ИСПРАВЛЕНИЕ: Защита от деления на ноль
-        if len(selected_places) == 0:
-            return self._get_minimal_fallback_route()
-            
         place_duration = max(25, total_duration // len(selected_places))
         
         route_places = []
@@ -353,7 +346,7 @@ class RouteExplainer:
         
         return {
             "route_name": route_name,
-            "total_duration": min(place_duration * len(route_places), 1440),  # Ограничение 24 часа
+            "total_duration": place_duration * len(route_places),
             "places": route_places,
             "timeline": f"Посещение {len(route_places)} мест",
             "explanation": f"Маршрут составлен автоматически с учетом ваших интересов: {', '.join(user_interests) if user_interests else 'основные достопримечательности'}"
@@ -384,13 +377,13 @@ class RouteExplainer:
         
         if user_interests:
             interests_str = ' '.join(user_interests).lower()
-            if any(word in interests_str for word in ['истори', 'музей']):
+            if any(word in interests_str for word in ['история', 'музей']):
                 return "Исторический маршрут по городу"
-            elif any(word in interests_str for word in ['еда', 'кухн', 'ресторан', 'кофе']):
+            elif any(word in interests_str for word in ['еда', 'кухня', 'ресторан', 'кофе']):
                 return "Гастрономический маршрут"
-            elif any(word in interests_str for word in ['покуп', 'шоппинг']):
+            elif any(word in interests_str for word in ['покупка', 'шоппинг']):
                 return "Торговый маршрут"
-            elif any(word in interests_str for word in ['развлек', 'отдых']):
+            elif any(word in interests_str for word in ['развлечение', 'отдых']):
                 return "Развлекательный маршрут"
         
         return "Обзорный маршрут по Нижнему Новгороду"
@@ -426,10 +419,9 @@ def get_bot_token():
 def load_dataset():
     try:
         ds = pd.read_excel('dataset.xlsx')
-        print(f"✅ Датасет загружен: {len(ds)} записей")  # ОТЛАДКА
         return ds
     except Exception as e:
-        print(f"❌ Ошибка загрузки датасета - {e}")  # ОТЛАДКА
+        print(f"Ошибка загрузки датасета - {e}")
         return None
 
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE):
@@ -449,14 +441,13 @@ async def handle_message(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
 def get_embeddings(texts):
     if not HF_API_TOKEN:
-        print("❌ Ошибка: HF_API_TOKEN не установлен")  # ОТЛАДКА
+        print("Ошибка: HF_API_TOKEN не установлен")
         return None
         
     if isinstance(texts, str):
         texts = [texts]
     
     try:
-        print(f"🔄 Отправляем запрос к Sentence Transformer API для {len(texts)} текстов")  # ОТЛАДКА
         response = requests.post(
             HF_API_URL,
             headers=headers,
@@ -465,15 +456,14 @@ def get_embeddings(texts):
         )
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ Успешно получены эмбеддинги от Sentence Transformer")  # ОТЛАДКА
             if isinstance(data, list) and isinstance(data[0], dict) and "embedding" in data[0]:
                 return [item["embedding"] for item in data]
             return data
         else:
-            logger.error(f"❌ Ошибка Sentence Transformer API: {response.status_code} - {response.text}")  # ОТЛАДКА
+            logger.error(f"Ошибка HF API: {response.status_code} - {response.text}")
             return None
     except Exception as e:
-        logger.error(f"❌ Исключение при запросе к Sentence Transformer API: {e}")  # ОТЛАДКА
+        logger.error(f"Исключение при запросе к HF API: {e}")
         return None
 
 category_names = [
@@ -495,27 +485,21 @@ category_names = [
     ]
     
 def load_category_embeddings():
-    print("🔄 Загружаем эмбеддинги категорий...")  # ОТЛАДКА
     embeddings = get_embeddings(category_names)
     if embeddings:
-        print(f"✅ Эмбеддинги категорий загружены, размер: {len(embeddings)}")  # ОТЛАДКА
         return torch.tensor(embeddings)
     else:
-        logger.error("❌ Не удалось получить эмбеддинги категорий")  # ОТЛАДКА
+        logger.error("Не удалось получить эмбеддинги категорий")
         return None
 
 category_embeddings = load_category_embeddings()
 
 def define_categories(text, similarity_threshold=0.5, min_categories=3, max_categories=5):
-    print(f"🎯 Определяем категории для запроса: '{text}'")  # ОТЛАДКА
-    
     if category_embeddings is None:
-        print("❌ Эмбеддинги категорий не загружены")  # ОТЛАДКА
         return []
     
     query_emb = get_embeddings(text)
     if not query_emb:
-        print("❌ Не удалось получить эмбеддинг запроса")  # ОТЛАДКА
         return []
     
     query_emb = torch.tensor(query_emb)
@@ -539,28 +523,14 @@ def define_categories(text, similarity_threshold=0.5, min_categories=3, max_cate
             if len(found) >= min_categories:
                 break
 
-    print(f"🎯 Найдены категории для '{text}': {found}")  # ОТЛАДКА
     return found[:max_categories]
 
 def get_candidate_places(query, ds):
-    print(f"🔍 Ищем кандидаты для запроса: '{query}'")  # ОТЛАДКА
     top_categories_with_score = define_categories(query)
     top_categories_ids=[cid for cid, score in top_categories_with_score]
-    
-    # ИСПРАВЛЕНИЕ: Защита от пустого списка категорий
-    if not top_categories_ids:
-        print("⚠️ Не найдено подходящих категорий, используем случайные места")  # ОТЛАДКА
-        # Возвращаем случайные места из датасета
-        if ds is not None and len(ds) > 0:
-            return ds.sample(min(5, len(ds))).copy()
-        else:
-            return pd.DataFrame()
-    
     candidate_places=ds[ds['category_id'].isin(top_categories_ids)].copy()
     score_dict = {cid: score for cid, score in top_categories_with_score}
     candidate_places['score']=candidate_places['category_id'].apply(lambda x: score_dict.get(x, 0))
-    
-    print(f"📍 Найдено кандидатов: {len(candidate_places)}")  # ОТЛАДКА
     return candidate_places
 
 categories_time = {
@@ -583,7 +553,7 @@ categories_time = {
 
 @flask_app.route('/generate_route', methods=['POST', 'OPTIONS'])
 def generate_route():
-    logger.info("🚀 generate_route called")  # ОТЛАДКА
+    logger.info("generate_route called")
 
     if request.method == 'OPTIONS':
         response = jsonify({'status': 'ok'})
@@ -592,7 +562,6 @@ def generate_route():
     try:
         data = request.get_json()
         if not data:
-            print("❌ Нет JSON данных в запросе")  # ОТЛАДКА
             return jsonify({'error': 'No JSON data provided'}), 400
 
         query = data.get('query')
@@ -600,47 +569,20 @@ def generate_route():
         minutes = data.get('minutes')
         startPoint = data.get('startPoint')
 
-        print(f"📨 Получен запрос: query='{query}', hours={hours}, minutes={minutes}, startPoint='{startPoint}'")  # ОТЛАДКА
-
         if not query:
-            print("❌ Отсутствует query в запросе")  # ОТЛАДКА
             return jsonify({'error': 'Query is required'}), 400
 
-        # ИСПРАВЛЕНИЕ: Правильное преобразование времени
-        try:
-            hours = int(hours) if hours is not None else 0
-            minutes = int(minutes) if minutes is not None else 0
-            total_minutes = hours * 60 + minutes
-            if total_minutes <= 0:
-                total_minutes = 180  # Значение по умолчанию 3 часа
-        except (ValueError, TypeError) as e:
-            print(f"⚠️ Ошибка преобразования времени: {e}, используем значение по умолчанию")  # ОТЛАДКА
-            total_minutes = 180  # Значение по умолчанию 3 часа
-
-        print(f"⏱ Рассчитано общее время: {total_minutes} минут")  # ОТЛАДКА
-
         request_categories = define_categories(query)
-        print(f"🎯 Найденные категории: {request_categories}")  # ОТЛАДКА
 
         ds = load_dataset()
         if ds is None:
-            print("❌ Не удалось загрузить датасет")  # ОТЛАДКА
             return jsonify({'error': 'Failed to load dataset'}), 500
 
-        # ИСПРАВЛЕНИЕ: Защита от пустого датасета
-        if len(ds) == 0:
-            print("❌ Датасет пустой")  # ОТЛАДКА
-            return jsonify({'error': 'Dataset is empty'}), 500
+        top_categories_ids = [cid for cid, score in request_categories]
+        list_of_places = ds[ds['category_id'].isin(top_categories_ids)]
 
         # Получаем кандидатов для маршрута
         candidate_places = get_candidate_places(query, ds)
-        
-        # ИСПРАВЛЕНИЕ: Защита от пустого списка кандидатов
-        if candidate_places.empty:
-            print("⚠️ Нет подходящих мест, используем случайные из датасета")  # ОТЛАДКА
-            candidate_places = ds.sample(min(5, len(ds))).copy()
-        
-        print(f"📍 Отобрано кандидатов для маршрута: {len(candidate_places)}")  # ОТЛАДКА
         
         # Преобразуем в формат для RouteExplainer
         places_for_explainer = []
@@ -652,7 +594,8 @@ def generate_route():
                 'visit_duration': categories_time.get(place['category_id'], 30)
             })
 
-        print(f"🔄 Подготовлено мест для RouteExplainer: {len(places_for_explainer)}")  # ОТЛАДКА
+        # Вычисляем общее время
+        total_minutes = (hours * 60 + minutes) if hours and minutes else 180
         
         # Используем RouteExplainer для создания маршрута
         route = route_explainer.create_route(
@@ -662,44 +605,28 @@ def generate_route():
             current_location=startPoint
         )
 
-        print(f"🗺 RouteExplainer вернул маршрут: {route['route_name']}")  # ОТЛАДКА
-        
         # Формируем ответ в нужном формате
         result_places = []
         for place in route['places']:
             # Находим соответствующее место в датасете
-            original_place = candidate_places[candidate_places['title'] == place['name']]
-            if not original_place.empty:
-                original_place = original_place.iloc[0]
-                try:
-                    coords = original_place['coordinate'].replace("POINT(", "").replace(")", "").split()
-                    result_places.append({
-                        "title": original_place['title'],
-                        "address": original_place['address'],
-                        "coord": [float(coords[0]), float(coords[1])],
-                        "description": original_place.get('description', ''),
-                        "reason": place['reason'],
-                        "time": place['duration']
-                    })
-                except Exception as e:
-                    print(f"⚠️ Ошибка обработки координат для {place['name']}: {e}")  # ОТЛАДКА
-                    # Добавляем место без координат
-                    result_places.append({
-                        "title": place['name'],
-                        "address": "Адрес не указан",
-                        "coord": [56.326887, 44.005986],  # Координаты по умолчанию (центр НН)
-                        "description": "Нет описания",
-                        "reason": place['reason'],
-                        "time": place['duration']
-                    })
-                logger.info(f"Place info: {original_place['title']}, at {original_place['address']}, desc. - {original_place.get('description', '')}, {place['reason']}, {place['duration']}")
+            original_place = candidate_places[candidate_places['title'] == place['name']].iloc[0] if not candidate_places[candidate_places['title'] == place['name']].empty else None
+            
+            if original_place is not None:
+                coords = original_place['coordinate'].replace("POINT(", "").replace(")", "").split()
+                result_places.append({
+                    "title": original_place['name'],
+                    "address": original_place['address'],
+                    "coord": [float(coords[0]), float(coords[1])],
+                    "description": original_place.get('description', ''),
+                    "reason": original_place['reason'],
+                    "time": original_place['duration']
+                })
 
-        # ИСПРАВЛЕНИЕ: Человеко-читаемый формат времени
+        # Форматируем общее время
         total_h = route['total_duration'] // 60
         total_m = route['total_duration'] % 60
-        totalTime = f"{total_h} ч {total_m} мин"
-        logger.info(f"Times - {total_h}, {total_m}, {totalTime}")
-        
+        totalTime = f"{total_h}.{total_m:02d}"
+
         result = {
             "startPoint": startPoint,
             "places": result_places,
@@ -709,14 +636,11 @@ def generate_route():
             "timeline": route.get('timeline', '')
         }
 
-        print(f"✅ Успешно сформирован ответ: {len(result_places)} мест, время: {totalTime}")  # ОТЛАДКА
         response = jsonify(result)
         return response
 
     except Exception as e:
-        logger.error(f"💥 Критическая ошибка в generate_route: {str(e)}")  # ОТЛАДКА
-        import traceback
-        traceback.print_exc()  # Печать полного стека вызовов
+        logger.error(f"Error in generate_route: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
 
 def test1():
@@ -762,8 +686,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-
-
-
-
