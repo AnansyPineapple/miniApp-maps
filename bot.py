@@ -674,12 +674,12 @@ def generate_route():
                 try:
                     coords = original_place['coordinate'].replace("POINT(", "").replace(")", "").split()
                     result_places.append({
-                        "title": place['name'],
+                        "title": original_place['name'],
                         "address": original_place['address'],
                         "coord": [float(coords[0]), float(coords[1])],
                         "description": original_place.get('description', ''),
-                        "reason": place['reason'],
-                        "time": place['duration']
+                        "reason": original_place['reason'],
+                        "time": original_place['duration']
                     })
                 except Exception as e:
                     print(f"⚠️ Ошибка обработки координат для {place['name']}: {e}")  # ОТЛАДКА
@@ -760,3 +760,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
