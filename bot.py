@@ -698,7 +698,7 @@ def generate_route():
         total_h = route['total_duration'] // 60
         total_m = route['total_duration'] % 60
         totalTime = f"{total_h} ч {total_m} мин"
-        logger.info(f"Times - {total_h}, {total_m}, {totalTime})
+        logger.info(f"Times - {total_h}, {total_m}, {totalTime}")
         
         result = {
             "startPoint": startPoint,
@@ -762,6 +762,7 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
 
