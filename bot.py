@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Application, CommandHandler, MessageHandler, filters, ContextTypes
 from flask import Flask, request, jsonify, make_response
-from flask_cors import CORS
+from flask_cors import CORS, cross_origin
 from threading import Thread
 import random
 from sentence_transformers import SentenceTransformer, util
@@ -552,12 +552,13 @@ categories_time = {
 }
 
 @flask_app.route('/generate_route', methods=['POST', 'OPTIONS'])
+@cross_origin()
 def generate_route():
     logger.info("generate_route called")
 
-    if request.method == 'OPTIONS':
-        response = jsonify({'status': 'ok'})
-        return response
+    #if request.method == 'OPTIONS':
+     #   response = jsonify({'status': 'ok'})
+      #  return response
 
     try:
         data = request.get_json()
