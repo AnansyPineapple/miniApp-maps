@@ -589,7 +589,7 @@ def generate_route():
         places_for_explainer = []
         for _, place in candidate_places.head(10).iterrows():  # Берем топ-10 мест
             places_for_explainer.append({
-                'name': place['name'],
+                'name': place['title'],
                 'description': place.get('description', ''),
                 'category_id': place['category_id'],
                 'visit_duration': categories_time.get(place['category_id'], 30)
