@@ -22,11 +22,15 @@ function init() {
     });
 
     const routeData = JSON.parse(localStorage.getItem('routeData'));
+    console.log('Received data:', routeData);
 
     if (routeData && routeData.places && Array.isArray(routeData.places)) {
         const container = document.querySelector('.ansContainer');
 
-        enteredTime = routeData.time;
+        const Time = routeData.totalTime;
+        const Hours = routeData.hours;
+        const Minutes = routeData.minutes;
+        
         ymaps.geocode(routeData.startPoint, {results: 1})
             .then(function (start) {
                 const start_coords = start.geoObjects.get(0).geometry.getCoordinates();
@@ -109,12 +113,12 @@ function init() {
 
                             <div class="objDescriptionWrapper">
                                 <div class="objDescription truncatedText">
-                                    ${original_place.description}
+                                    ${place.description}
                                 </div>
                             </div>
                             <div class="ObjFooter" 
                             data-text="
-                            ${original_place.reason}
+                            ${place.reason}
                             "
                             >
                             Почему мне предложили этот объект?

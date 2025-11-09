@@ -614,12 +614,12 @@ def generate_route():
             if original_place is not None:
                 coords = original_place['coordinate'].replace("POINT(", "").replace(")", "").split()
                 result_places.append({
-                    "title": original_place['name'],
+                    "title": place['name'],
                     "address": original_place['address'],
                     "coord": [float(coords[0]), float(coords[1])],
                     "description": original_place.get('description', ''),
-                    "reason": original_place['reason'],
-                    "time": original_place['duration']
+                    "reason": place['reason'],
+                    "time": place['duration']
                 })
 
         # Форматируем общее время
@@ -633,7 +633,9 @@ def generate_route():
             "totalTime": totalTime,
             "route_name": route.get('route_name', 'Маршрут по Нижнему Новгороду'),
             "explanation": route.get('explanation', ''),
-            "timeline": route.get('timeline', '')
+            "timeline": route.get('timeline', ''),
+            "hours": hours,
+            "minutes": minutes
         }
 
         response = jsonify(result)
