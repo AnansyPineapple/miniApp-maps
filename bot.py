@@ -674,7 +674,7 @@ def generate_route():
                 try:
                     coords = original_place['coordinate'].replace("POINT(", "").replace(")", "").split()
                     result_places.append({
-                        "title": original_place['name'],
+                        "title": original_place['title'],
                         "address": original_place['address'],
                         "coord": [float(coords[0]), float(coords[1])],
                         "description": original_place.get('description', ''),
@@ -692,7 +692,7 @@ def generate_route():
                         "reason": place['reason'],
                         "time": place['duration']
                     })
-                logger.info(f"Place info: {original_place['name']}, at {original_place['address']}, desc. - {original_place.get('description', '')}, {place['reason']}, {place['duration']})
+                logger.info(f"Place info: {original_place['title']}, at {original_place['address']}, desc. - {original_place.get('description', '')}, {place['reason']}, {place['duration']})
 
         # ИСПРАВЛЕНИЕ: Человеко-читаемый формат времени
         total_h = route['total_duration'] // 60
@@ -762,5 +762,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
 
