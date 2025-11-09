@@ -678,26 +678,28 @@ def generate_route():
                         "address": original_place['address'],
                         "coord": [float(coords[0]), float(coords[1])],
                         "description": original_place.get('description', ''),
-                        "reason": original_place['reason'],
-                        "time": original_place['duration']
+                        "reason": place['reason'],
+                        "time": place['duration']
                     })
                 except Exception as e:
                     print(f"⚠️ Ошибка обработки координат для {place['name']}: {e}")  # ОТЛАДКА
                     # Добавляем место без координат
                     result_places.append({
                         "title": place['name'],
-                        "address": original_place.get('address', ''),
+                        "address": "Адрес не указан",
                         "coord": [56.326887, 44.005986],  # Координаты по умолчанию (центр НН)
-                        "description": original_place.get('description', ''),
+                        "description": "Нет описания",
                         "reason": place['reason'],
                         "time": place['duration']
                     })
+                logger.info(f"Place info: {original_place['name']}, at {original_place['address']}, desc. - {original_place.get('description', '')}, {place['reason']}, {place['duration']})
 
         # ИСПРАВЛЕНИЕ: Человеко-читаемый формат времени
         total_h = route['total_duration'] // 60
         total_m = route['total_duration'] % 60
         totalTime = f"{total_h} ч {total_m} мин"
-
+        logger.info(f"Times - {total_h}, {total_m}, {totalTime})
+        
         result = {
             "startPoint": startPoint,
             "places": result_places,
@@ -760,4 +762,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 
