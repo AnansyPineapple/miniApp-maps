@@ -108,7 +108,7 @@ function init() {
                                 <div class="timeToObjText">
                                     Время на объекте:
                                 </div>
-                                <div class="number" id=""> ${place.time} </div>
+                                <div class="number" id=""> ${place.time} минут </div>
                             </div>
 
                             <div class="objDescriptionWrapper">
