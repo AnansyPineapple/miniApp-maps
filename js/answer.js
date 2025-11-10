@@ -34,6 +34,12 @@ function init() {
         ymaps.geocode(routeData.startPoint, {results: 1})
             .then(function (start) {
                 const start_coords = start.geoObjects.get(0).geometry.getCoordinates();
+
+                routeData.places.sort((a, b) => {
+                    const distA = calculateDistance(start_coords, [a.coord[0], a.coord[1]]);
+                    const distB = calculateDistance(start_coords, [b.coord[0], b.coord[1]]);
+                    return distA - distB;
+                });
                 
                 routeData.places.forEach((place, index) => {
                     let distance = 0;
