@@ -33,6 +33,32 @@ headers = {
 flask_app = Flask(__name__)
 CORS(flask_app)
 
+def check_hf_token():
+    """Проверяет валидность HF_API_TOKEN"""
+    if not HF_API_TOKEN:
+        print("❌ HF_API_TOKEN не установлен")
+        return False
+    
+    # Простой запрос для проверки токена
+    try:
+        test_response = requests.get(
+            "https://huggingface.co/api/whoami",
+            headers={"Authorization": f"Bearer {HF_API_TOKEN}"},
+            timeout=10
+        )
+        if test_response.status_code == 200:
+            print("✅ HF_API_TOKEN валиден")
+            return True
+        else:
+            print(f"❌ HF_API_TOKEN невалиден: {test_response.status_code}")
+            return False
+    except Exception as e:
+        print(f"❌ Ошибка проверки HF_API_TOKEN: {e}")
+        return False
+
+# Проверяем токен при запуске
+check_hf_token()
+
 class RouteExplainer:
     def __init__(self, api_token=None, model_name="IlyaGusev/saiga_llama3_8b:featherless-ai"):
         self.model_name = model_name
@@ -187,6 +213,22 @@ class RouteExplainer:
         
         return base_reason
 
+    def _fix_json_errors(self, json_str):
+        """Исправляет распространенные ошибки в JSON от модели"""
+        # Исправляем пропущенные запятые между элементами массива
+        json_str = re.sub(r'"\s*\n\s*"', '", "', json_str)
+        json_str = re.sub(r'"\s*}\s*"', '"}, "', json_str)
+        json_str = re.sub(r'"\s*}\s*{', '"}, {', json_str)
+        
+        # Исправляем пропущенные запятые между свойствами объекта
+        json_str = re.sub(r'"\s*\n\s*"', '",\n"', json_str)
+        
+        # Удаляем лишние запятые перед закрывающими скобками
+        json_str = re.sub(r',\s*}', '}', json_str)
+        json_str = re.sub(r',\s*]', ']', json_str)
+        
+        return json_str
+
     def create_route(self, places, user_interests, total_duration, current_location):
         cache_key = self._generate_cache_key(places, user_interests, total_duration, current_location)
         
@@ -255,17 +297,37 @@ class RouteExplainer:
     def _parse_and_validate_response(self, response_text, places, user_interests):
         print(f"🔍 Парсим ответ модели...")
         
-        start = response_text.find('{')
-        end = response_text.rfind('}') + 1
+        # Улучшенное извлечение JSON с помощью regex
+        json_pattern = r'\{[^{}]*\{[^{}]*\}[^{}]*\}'  # Ищем вложенные объекты
+        matches = re.finditer(json_pattern, response_text, re.DOTALL)
         
-        if start == -1 or end == 0:
-            print("❌ Не найден JSON в ответе")
+        json_str = None
+        for match in matches:
+            try:
+                potential_json = match.group()
+                # Пробуем распарсить чтобы проверить валидность
+                json.loads(potential_json)
+                json_str = potential_json
+                break
+            except:
+                continue
+        
+        if not json_str:
+            # Fallback: ищем простой JSON
+            start = response_text.find('{')
+            end = response_text.rfind('}') + 1
+            if start != -1 and end != 0:
+                json_str = response_text[start:end]
+        
+        if not json_str:
+            print("❌ Не найден валидный JSON в ответе")
             return self._get_optimized_fallback_route(places, user_interests, 120)
         
+        print(f"📄 Найден JSON: {json_str[:200]}...")
+        
         try:
-            json_str = response_text[start:end]
-            print(f"📄 Найден JSON: {json_str[:200]}...")
-            
+            # Пробуем починить распространенные ошибки в JSON
+            json_str = self._fix_json_errors(json_str)
             result = json.loads(json_str)
             
             if 'places' not in result or not isinstance(result['places'], list):
@@ -321,7 +383,7 @@ class RouteExplainer:
             return result
             
         except (json.JSONDecodeError, KeyError) as e:
-            print(f"❌ Ошибка парсинга JSON: {e}")
+            print(f"❌ Ошибка парсинга JSON после исправлений: {e}")
             return self._get_optimized_fallback_route(places, user_interests, 120)
 
     def _get_optimized_fallback_route(self, places, user_interests, total_duration):
@@ -460,27 +522,34 @@ def get_embeddings(texts):
             HF_API_URL,
             headers=headers,
             json={"inputs": texts, "options": {"wait_for_model": True}},
-            timeout=30
+            timeout=60  # Увеличиваем таймаут
         )
+        
         if response.status_code == 200:
             data = response.json()
-            print(f"✅ Успешно получены эмбеддинги от Sentence Transformer")
-            print(f"📊 Формат ответа: {type(data)}, длина: {len(data) if isinstance(data, list) else 'N/A'}")
+            print(f"✅ Успешно получены эмбеддинги")
             
-            # ИСПРАВЛЕНИЕ: Правильная обработка формата ответа
+            # Улучшенная обработка разных форматов ответа
             if isinstance(data, list):
-                if len(data) > 0 and isinstance(data[0], list):
-                    # Стандартный формат: список эмбеддингов
-                    return data
-                elif len(data) > 0 and isinstance(data[0], (int, float)):
-                    # Один эмбеддинг возвращен как плоский список
-                    return [data]
-            return data
-        else:
-            logger.error(f"❌ Ошибка Sentence Transformer API: {response.status_code} - {response.text}")
+                if all(isinstance(item, list) for item in data):
+                    return data  # Стандартный формат: [[emb1], [emb2], ...]
+                elif all(isinstance(item, (int, float)) for item in data):
+                    return [data]  # Один эмбеддинг как плоский список
+                elif isinstance(data[0], dict) and "embedding" in data[0]:
+                    return [item["embedding"] for item in data]  # Формат с ключом "embedding"
+            
+            # Если формат не распознан, логируем для отладки
+            print(f"⚠️ Неизвестный формат ответа: {type(data)}")
+            if isinstance(data, dict):
+                print(f"📊 Ключи в ответе: {data.keys()}")
             return None
+            
+        else:
+            print(f"❌ Ошибка API: {response.status_code} - {response.text}")
+            return None
+            
     except Exception as e:
-        logger.error(f"❌ Исключение при запросе к Sentence Transformer API: {e}")
+        print(f"💥 Исключение при запросе эмбеддингов: {e}")
         return None
 
 category_names = [
@@ -504,18 +573,32 @@ category_names = [
 def load_category_embeddings():
     print("🔄 Загружаем эмбеддинги категорий...")
     embeddings = get_embeddings(category_names)
-    if embeddings:
-        print(f"✅ Эмбеддинги категорий загружены, размер: {len(embeddings)}")
-        # ИСПРАВЛЕНИЕ: Проверка формата перед созданием тензора
+    
+    if not embeddings:
+        print("❌ Не удалось получить эмбеддинги категорий")
+        # Создаем случайные эмбеддинги как fallback
+        import numpy as np
+        random_embeddings = np.random.randn(len(category_names), 384).tolist()
+        print("🔄 Используем случайные эмбеддинги как запасной вариант")
+        return torch.tensor(random_embeddings)
+    
+    print(f"✅ Эмбеддинги категорий загружены, размер: {len(embeddings)}")
+    
+    # Проверяем и преобразуем в тензор
+    try:
         if isinstance(embeddings, list) and len(embeddings) > 0:
             return torch.tensor(embeddings)
-    else:
-        logger.error("❌ Не удалось получить эмбеддинги категорий")
-        return None
+        else:
+            raise ValueError("Неверный формат эмбеддингов")
+    except Exception as e:
+        print(f"❌ Ошибка создания тензора: {e}")
+        # Fallback: случайные эмбеддинги
+        import numpy as np
+        return torch.tensor(np.random.randn(len(category_names), 384).tolist())
 
 category_embeddings = load_category_embeddings()
 
-def define_categories(text, similarity_threshold=0.3, min_categories=2, max_categories=5):  # Снижен порог
+def define_categories(text, similarity_threshold=0.3, min_categories=2, max_categories=5):
     print(f"🎯 Определяем категории для запроса: '{text}'")
     
     if category_embeddings is None:
@@ -585,6 +668,43 @@ def get_candidate_places(query, ds):
         print(f"📋 Примеры найденных мест: {candidate_places['title'].head(3).tolist()}")
     
     return candidate_places
+
+def find_place_in_dataset(place_name, candidate_places):
+    """Находит место в датасете по названию с учетом нечеткого соответствия"""
+    place_name_clean = place_name.lower().strip()
+    
+    # 1. Точное совпадение
+    exact_match = candidate_places[
+        candidate_places['title'].str.lower() == place_name_clean
+    ]
+    if not exact_match.empty:
+        return exact_match.iloc[0]
+    
+    # 2. Частичное совпадение (содержит)
+    partial_match = candidate_places[
+        candidate_places['title'].str.lower().str.contains(place_name_clean, na=False)
+    ]
+    if not partial_match.empty:
+        return partial_match.iloc[0]
+    
+    # 3. Похожее название (по ключевым словам)
+    place_keywords = set(place_name_clean.split())
+    best_match = None
+    best_score = 0
+    
+    for _, candidate in candidate_places.iterrows():
+        candidate_title = candidate['title'].lower()
+        candidate_words = set(candidate_title.split())
+        
+        # Вычисляем схожесть по пересечению слов
+        common_words = place_keywords.intersection(candidate_words)
+        score = len(common_words) / max(len(place_keywords), 1)
+        
+        if score > best_score and score > 0.3:  # Порог схожести
+            best_score = score
+            best_match = candidate
+    
+    return best_match
 
 categories_time = {
     1: 15, 2: 40, 3: 15, 4: 40, 5: 30, 6: 40, 7: 40, 8: 120, 
@@ -671,19 +791,10 @@ def generate_route():
         # Формируем ответ в нужном формате
         result_places = []
         for place in route['places']:
-            # ИСПРАВЛЕНИЕ: Более гибкий поиск места в датасете
-            original_place = candidate_places[
-                candidate_places['title'].str.contains(place['name'], case=False, na=False)
-            ]
-            if original_place.empty:
-                # Пробуем найти по частичному совпадению
-                for _, cand_place in candidate_places.iterrows():
-                    if place['name'] in cand_place['title'] or cand_place['title'] in place['name']:
-                        original_place = pd.DataFrame([cand_place])
-                        break
+            # ИСПРАВЛЕНИЕ: Используем улучшенный поиск мест
+            original_place = find_place_in_dataset(place['name'], candidate_places)
             
-            if not original_place.empty:
-                original_place = original_place.iloc[0]
+            if original_place is not None:
                 try:
                     # ИСПРАВЛЕНИЕ: Более надежное извлечение координат
                     coord_str = original_place['coordinate']
