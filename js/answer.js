@@ -160,7 +160,7 @@ function init() {
                                 <div class="timeToObjText">
                                     Время на объекте:
                                 </div>
-                                <div class="number">${place.time} минут</div>
+                                <div class="number">${formatTime(place.time)}</div>
                             </div>
 
                             <div class="objDescriptionWrapper">
@@ -190,7 +190,7 @@ function init() {
                                 <div class="inputedTimeText">
                                     Введенное время:
                                 </div>
-                                <div class="number">${routeData.enteredTime || Time}</div>
+                                <div class="number">${formatTime(routeData.userTime)}</div>
                             </div>
                             <div class="realTime">
                                 <div class="inputedTimeText">
