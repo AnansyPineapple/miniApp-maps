@@ -729,7 +729,6 @@ def generate_route():
         hours = data.get('hours')
         minutes = data.get('minutes')
         startPoint = data.get('startPoint')
-        userTime = 0
 
         print(f"📨 Получен запрос: query='{query}', hours={hours}, minutes={minutes}, startPoint='{startPoint}'")
 
@@ -743,7 +742,7 @@ def generate_route():
             total_minutes = hours * 60 + minutes
             if total_minutes <= 0:
                 total_minutes = 180
-                userTime = total_minutes
+            userTime = total_minutes
         except (ValueError, TypeError) as e:
             print(f"⚠️ Ошибка преобразования времени: {e}, используем значение по умолчанию")
             total_minutes = 180
@@ -908,3 +907,4 @@ def main():
 if __name__ == "__main__":
 
     main()
+
