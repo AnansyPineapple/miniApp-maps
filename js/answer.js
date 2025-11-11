@@ -14,6 +14,41 @@ function init() {
         }
     }
 
+    // Функция для расчета времени через маршрутизатор
+    async function calculateRouteTime(startCoords, endCoords, transportType = 'auto') {
+        return new Promise((resolve, reject) => {
+            ymaps.route([
+                startCoords,
+                endCoords
+            ], {
+                routingMode: transportType
+            }).then(
+                function (route) {
+                    const timeInSeconds = route.getJamsTime();
+                    const timeInMinutes = Math.round(timeInSeconds / 60);
+                    resolve(timeInMinutes);
+                },
+                function (error) {
+                    console.error('Ошибка расчета маршрута:', error);
+                    const distance = calculateDistance(startCoords, endCoords);
+                    const approximateTime = Math.round(distance / 250); // ~250 м/мин = 15 км/ч
+                    resolve(approximateTime);
+                }
+            );
+        });
+    }
+
+    // Функция для форматирования времени
+    function formatTime(minutes) {
+        if (minutes < 60) {
+            return `${minutes} мин.`;
+        } else {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return mins > 0 ? `${hours}ч. ${mins}мин.` : `${hours}ч.`;
+        }
+    }
+
     document.addEventListener('DOMContentLoaded', () => {
         const overlay = document.getElementById('loadingOverlay');
         if (overlay) {
@@ -23,7 +58,7 @@ function init() {
 
     const routeData = JSON.parse(localStorage.getItem('routeData'));
     console.log('Received data:', routeData);
-
+    
     if (routeData && routeData.places && Array.isArray(routeData.places)) {
         const container = document.querySelector('.ansContainer');
 
@@ -32,33 +67,44 @@ function init() {
         const Minutes = routeData.minutes;
         
         ymaps.geocode(routeData.startPoint, {results: 1})
-            .then(function (start) {
+            .then(async function (start) {
                 const start_coords = start.geoObjects.get(0).geometry.getCoordinates();
-
+                
+                // Сортируем места по расстоянию от стартовой точки
                 routeData.places.sort((a, b) => {
                     const distA = calculateDistance(start_coords, [a.coord[0], a.coord[1]]);
                     const distB = calculateDistance(start_coords, [b.coord[0], b.coord[1]]);
                     return distA - distB;
                 });
-                
-                routeData.places.forEach((place, index) => {
+
+                // Рассчитываем время для каждого отрезка маршрута
+                for (let index = 0; index < routeData.places.length; index++) {
+                    const place = routeData.places[index];
                     let distance = 0;
                     let distanceText = "0 м";
+                    let travelTime = 0;
+                    let travelTimeText = "0 мин.";
 
                     if (index === 0) {
+                        // От стартовой точки до первого объекта
                         distance = calculateDistance(
                             [start_coords[0], start_coords[1]],
                             [place.coord[0], place.coord[1]]
                         );
                         distanceText = formatDistance(distance);
+                        travelTime = await calculateRouteTime(start_coords, place.coord);
+                        travelTimeText = formatTime(travelTime);
                     } 
                     else {
+                        // От предыдущего объекта до текущего
                         const prevPlace = routeData.places[index - 1];
                         distance = calculateDistance(
                             [prevPlace.coord[0], prevPlace.coord[1]],
                             [place.coord[0], place.coord[1]]
                         );
                         distanceText = formatDistance(distance);
+                        travelTime = await calculateRouteTime(prevPlace.coord, place.coord);
+                        travelTimeText = formatTime(travelTime);
                     }
 
                     const html = `
@@ -107,14 +153,14 @@ function init() {
                                 <div class="timeToObjText">
                                     Время в пути:
                                 </div>
-                                <div class="number" id=""> 1ч. 20мин. </div>
+                                <div class="number">${travelTimeText}</div>
                             </div>
                             
                             <div class="TimeToObj">
                                 <div class="timeToObjText">
                                     Время на объекте:
                                 </div>
-                                <div class="number" id=""> ${place.time} минут </div>
+                                <div class="number">${place.time} минут</div>
                             </div>
 
                             <div class="objDescriptionWrapper">
@@ -132,7 +178,7 @@ function init() {
                         </div>
                     `;
                     container.insertAdjacentHTML('beforeend', html);
-                });
+                }
 
                 const finalReport = `
                     <div class="finalReport aboutObject">
@@ -144,30 +190,43 @@ function init() {
                                 <div class="inputedTimeText">
                                     Введенное время:
                                 </div>
-                                <div class="number" id=""> ${enteredTime} </div>
+                                <div class="number">${routeData.enteredTime || Time}</div>
                             </div>
                             <div class="realTime">
                                 <div class="inputedTimeText">
                                     Предложенный маршрут:
                                 </div>
-                                <div class="number" id=""> ${routeData.totalTime} </div>
+                                <div class="number">${routeData.totalTime}</div>
                             </div>
                         </div>
                     </div>
                 `;
                 container.insertAdjacentHTML('beforeend', finalReport);
+
+                // Скрываем прелоадер после загрузки всех данных
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) {
+                    overlay.classList.remove('active');
+                }
             })
+            .catch(function (error) {
+                console.error('Ошибка геокодирования:', error);
+                // Скрываем прелоадер в случае ошибки
+                const overlay = document.getElementById('loadingOverlay');
+                if (overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
     }
 
+    // Остальной код (модальные окна, копирование и т.д.) остается без изменений
     const modalOverlay = document.getElementById('modalOverlay');
     const modalText = document.querySelector('.modalText');
     const modalCloseBtn = document.getElementById('modalCloseBtn');
 
     document.querySelectorAll('.ObjFooter').forEach(el => {
         el.addEventListener('click', () => {
-            // Подставить текст для объекта
             modalText.textContent = el.dataset.text;
-
             modalOverlay.style.display = 'flex';
             setTimeout(() => {
                 modalOverlay.classList.add('active'); 
@@ -191,23 +250,10 @@ function init() {
         }
     });
 
-
     const modalOverlayDesc = document.getElementById('modalOverlayDesc');
     const modalHeaderDesc = document.getElementById('modalHeaderDesc');
     const modalTextDesc = document.getElementById('modalTextDesc');
     const modalCloseBtnDesc = document.getElementById('modalCloseBtnDesc');
-
-    // document.querySelectorAll('.truncatedText').forEach(el => {
-    //     el.addEventListener('click', () => {
-    //         const obj = el.closest('.aboutObject');
-    //         const title = obj.querySelector('.objTitle').textContent;
-    //         const text = el.textContent;
-    //         modalHeaderDesc.textContent = title;
-    //         modalTextDesc.textContent = text;
-    //         modalOverlayDesc.style.display = 'flex';
-    //         setTimeout(() => modalOverlayDesc.classList.add('active'), 10);
-    //     });
-    // });
 
     document.querySelectorAll('.objDescription').forEach(el => {
         el.addEventListener('click', () => {
@@ -241,13 +287,10 @@ function init() {
         }
     });
 
-
-    //ставит индексы у объектов!!!!!
+    // Ставит индексы у объектов
     document.querySelectorAll('.aboutObject .objTitle').forEach((el, index) => {
         el.textContent = `${index + 1}. ${el.textContent}`;
     });
-
-
 
     document.querySelector('.buttonsCont button:last-child').addEventListener('click', () => {
         const objects = document.querySelectorAll('.aboutObject');
@@ -275,7 +318,6 @@ function init() {
                 console.error('Не удалось скопировать текст: ', err);
             });
     });
-
 
     document.querySelector('.buttonsCont button:first-child').addEventListener('click', () => {
         window.location.href = 'form.html';
